@@ -1,0 +1,21 @@
+# Debug enable flag.
+# Setting this to non-empty value enables debugging output.
+%__dolagen_debug 1
+
+# Specify which dependency generators should be ran.
+# Values should be a space-separated list of qualified class names of
+# generator factories (classes implementing GeneratorFactory interface).
+# Available hook factories are:
+#  * io.kojan.dola.generator.filesystem.FilesystemGeneratorFactory
+#  * io.kojan.dola.generator.jpscript.JPackageScriptGeneratorFactory
+#  * io.kojan.dola.generator.jpms.JPMSGeneratorFactory
+#  * io.kojan.dola.generator.maven.MavenGeneratorFactory
+%__dolagen_provides_generators io.kojan.dola.generator.filesystem.FilesystemGeneratorFactory io.kojan.dola.generator.jpscript.JPackageScriptGeneratorFactory io.kojan.dola.generator.jpms.JPMSGeneratorFactory io.kojan.dola.generator.maven.MavenGeneratorFactory
+%__dolagen_requires_generators io.kojan.dola.generator.filesystem.FilesystemGeneratorFactory io.kojan.dola.generator.jpscript.JPackageScriptGeneratorFactory io.kojan.dola.generator.maven.MavenGeneratorFactory
+
+# Specify which post-install hooks should be ran.
+# Value should be a space-separated list of qualified class names of
+# hook factories (classes implementing HookFactory interface).
+# Available hook factories are:
+#  * io.kojan.dola.generator.transformer.TransformerHookFactory
+%__dolagen_post_install_hooks io.kojan.dola.generator.transformer.TransformerHookFactory

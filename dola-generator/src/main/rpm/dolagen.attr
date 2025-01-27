@@ -1,0 +1,4 @@
+%__dolagen_provides() %{lua:(require "dola-generator").generate('provides')}
+%__dolagen_requires() %{lua:(require "dola-generator").generate('requires')}
+%__dolagen_path .*
+%__dolagen_protocol multifile

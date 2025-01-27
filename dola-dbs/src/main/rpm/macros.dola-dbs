@@ -1,0 +1,4 @@
+%buildsystem_maven_conf(-) %{lua:(require "dola-dbs").conf()}
+%buildsystem_maven_generate_buildrequires(-) %{lua:(require "dola-dbs").generate_buildrequires()}
+%buildsystem_maven_build(-) %{lua:(require "dola-dbs").build()}
+%buildsystem_maven_install(-) %{lua:(require "dola-dbs").install()}
