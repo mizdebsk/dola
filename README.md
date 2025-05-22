@@ -56,6 +56,13 @@ Features
   imperative RPM spec files compatible with systems using RPM < 4.20.
 
 
+Syntax
+------
+
+For description of the syntax for declarative spec files, see
+[SYNTAX.md](SYNTAX.md).
+
+
 Copying
 -------
 
