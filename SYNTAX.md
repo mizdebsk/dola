@@ -151,3 +151,21 @@ Glob matching and backreferences:
 Several packaging options at once:
 
     BuildOption:    =gid:my-artifact>file1>file2@subpkg|:alias
+
+
+Options for disabling tests
+---------------------------
+
+Options for disabling tests start with `!`
+
+Disable test classes:
+
+    BuildOption:    !SomeTest
+    BuildOption:    !SomeTest,!OtherTest
+    BuildOption:    !com.example.SomeTest
+
+Disable test methods:
+
+    BuildOption:    !SomeTest@testMethodName
+    BuildOption:    !SomeTest@method1,!OtherTest@method2
+    BuildOption:    !com.example.SomeTest
