@@ -19,7 +19,7 @@
   <parent>
     <groupId>io.kojan</groupId>
     <artifactId>kojan-parent</artifactId>
-    <version>6</version>
+    <version>7</version>
   </parent>
   <artifactId>dola-parent</artifactId>
   <version>1.0.0-SNAPSHOT</version>
