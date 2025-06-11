@@ -22,7 +22,7 @@
     <version>7</version>
   </parent>
   <artifactId>dola-parent</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Dola</name>
   <description>Software for packaging Java projects using Maven 4.</description>
