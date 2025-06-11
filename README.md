@@ -1,7 +1,7 @@
 [![build status](https://img.shields.io/github/actions/workflow/status/mizdebsk/dola/ci.yml?branch=master)](https://github.com/mizdebsk/dola/actions/workflows/ci.yml?query=branch%3Amaster)
 [![License](https://img.shields.io/github/license/mizdebsk/dola.svg?label=License)](https://www.apache.org/licenses/LICENSE-2.0)
-[![Maven Central version](https://img.shields.io/maven-central/v/io.kojan/dola.svg?label=Maven%20Central)](https://search.maven.org/artifact/io.kojan/dola)
-[![Javadoc](https://javadoc.io/badge2/io.kojan/dola/javadoc.svg)](https://javadoc.io/doc/io.kojan/dola)
+[![Maven Central version](https://img.shields.io/maven-central/v/io.kojan/dola-dbs.svg?label=Maven%20Central)](https://search.maven.org/artifact/io.kojan/dola-dbs)
+[![Javadoc](https://javadoc.io/badge2/io.kojan/dola-dbs/javadoc.svg)](https://javadoc.io/doc/io.kojan/dola-dbs)
 
 Dola
 ====
