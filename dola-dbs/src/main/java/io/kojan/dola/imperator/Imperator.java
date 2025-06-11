@@ -181,7 +181,7 @@ public class Imperator {
 
         String mavenGoal = ctx.isSkipTests() ? "package" : "verify";
         args.add(mavenGoal);
-        args.add("org.fedoraproject.xmvn:xmvn-mojo:5.0.0-SNAPSHOT:install");
+        args.add("org.fedoraproject.xmvn:xmvn-mojo:5.0.0:install");
 
         List<String> lines = new ArrayList<>();
         lines.add("# Run the actual Maven build, executing all build plugins and so on.");
