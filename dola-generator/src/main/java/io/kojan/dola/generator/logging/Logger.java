@@ -59,7 +59,7 @@ public class Logger {
 
     public static void startLogging() {
         Logger.print(BOX_TOP_LEFT + repeat(BOX_BORDER_HORIZONTAL, BOX_WIDTH - 2) + BOX_TOP_RIGHT);
-        debug("XMvn Generator");
+        debug("Dola Generator");
     }
 
     public static void startNewSection() {
