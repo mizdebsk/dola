@@ -22,6 +22,7 @@
     <version>1.0.0-SNAPSHOT</version>
   </parent>
   <artifactId>dola-bsx</artifactId>
+  <name>Dola BSX</name>
   <dependencies>
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
