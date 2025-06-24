@@ -87,6 +87,8 @@ public class BuildOptionParser {
     private void parseShortOption() {
         if (is("Fjpb")) {
             ctx.usesJavapackagesBootstrap(true);
+        } else if (is("Fs")) {
+            ctx.singletonPackaging(true);
         } else if (has("P") || has("D") || is("X")) {
             ctx.mavenOption(str);
         } else if (is("f")) {

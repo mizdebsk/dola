@@ -32,6 +32,7 @@ public class DeclarativeBuildBuilder {
     private final List<TransformOption> modelTransformations = new ArrayList<>();
     private final List<String> testExcludes = new ArrayList<>();
     private boolean usesJavapackagesBootstrap;
+    private boolean singletonPackaging;
 
     public DeclarativeBuildBuilder(String baseName) {
         this.baseName = baseName;
@@ -82,6 +83,11 @@ public class DeclarativeBuildBuilder {
         return this;
     }
 
+    public DeclarativeBuildBuilder singletonPackaging(boolean singletonPackaging) {
+        this.singletonPackaging = singletonPackaging;
+        return this;
+    }
+
     public DeclarativeBuild build() {
         return new DeclarativeBuild(
                 baseName,
@@ -92,6 +98,7 @@ public class DeclarativeBuildBuilder {
                 filteredBuildReqs,
                 modelTransformations,
                 testExcludes,
-                usesJavapackagesBootstrap);
+                usesJavapackagesBootstrap,
+                singletonPackaging);
     }
 }

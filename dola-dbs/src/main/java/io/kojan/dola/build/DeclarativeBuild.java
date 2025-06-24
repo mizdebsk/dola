@@ -30,6 +30,7 @@ public class DeclarativeBuild {
     private final List<TransformOption> transformOptions;
     private final List<String> testExcludes;
     private final boolean usesJavapackagesBootstrap;
+    private final boolean singletonPackaging;
 
     public DeclarativeBuild(
             String baseName,
@@ -40,7 +41,8 @@ public class DeclarativeBuild {
             Set<Artifact> filteredBuildReqs,
             List<TransformOption> transformOptions,
             List<String> testExcludes,
-            boolean usesJavapackagesBootstrap) {
+            boolean usesJavapackagesBootstrap,
+            boolean singletonPackaging) {
         this.baseName = baseName;
         this.skipTests = skipTests;
         this.mavenOptions = List.copyOf(mavenOptions);
@@ -50,6 +52,7 @@ public class DeclarativeBuild {
         this.transformOptions = List.copyOf(transformOptions);
         this.testExcludes = List.copyOf(testExcludes);
         this.usesJavapackagesBootstrap = usesJavapackagesBootstrap;
+        this.singletonPackaging = singletonPackaging;
     }
 
     public String getBaseName() {
@@ -86,5 +89,9 @@ public class DeclarativeBuild {
 
     public boolean usesJavapackagesBootstrap() {
         return usesJavapackagesBootstrap;
+    }
+
+    public boolean isSingletonPackaging() {
+        return singletonPackaging;
     }
 }

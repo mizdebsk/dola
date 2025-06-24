@@ -70,6 +70,25 @@ public class Imperator {
         conf.setBuildSettings(new BuildSettings());
         conf.getBuildSettings().setSkipTests(ctx.isSkipTests());
 
+        if (ctx.isSingletonPackaging()) {
+            PackagingRule rule1 = new PackagingRule();
+            org.fedoraproject.xmvn.config.Artifact glob1 =
+                    new org.fedoraproject.xmvn.config.Artifact();
+            glob1.setClassifier("*?");
+            rule1.setArtifactGlob(glob1);
+            rule1.setTargetPackage("__noinstall");
+            rule1.setOptional(true);
+            conf.addArtifactManagement(rule1);
+
+            PackagingRule rule2 = new PackagingRule();
+            org.fedoraproject.xmvn.config.Artifact glob2 =
+                    new org.fedoraproject.xmvn.config.Artifact();
+            glob2.setArtifactId("{*}");
+            rule2.setArtifactGlob(glob2);
+            rule2.setTargetPackage("@1");
+            conf.addArtifactManagement(rule2);
+        }
+
         for (PackagingOption po : ctx.getPackagingOptions()) {
             PackagingRule rule = new PackagingRule();
             org.fedoraproject.xmvn.config.Artifact glob =
