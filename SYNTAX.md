@@ -169,3 +169,17 @@ Disable test methods:
     BuildOption:    !SomeTest@testMethodName
     BuildOption:    !SomeTest@method1,!OtherTest@method2
     BuildOption:    !com.example.SomeTest
+
+
+Other options (features)
+------------------------
+
+Feature options start with `-F`
+
+Bootstrap with javapackages-bootstrap:
+
+    BuildOption:    -Fjpb
+
+Singleton packaging:
+
+    BuildOption:    -Fs
