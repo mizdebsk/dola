@@ -112,18 +112,11 @@ public class BuildOptionParser {
         StringBuilder sb = new StringBuilder();
         while (pos < str.length()) {
             char ch = str.charAt(pos);
-            if ((ch >= 'a' && ch <= 'z')
-                    || (ch >= 'A' && ch <= 'Z')
-                    || (ch >= '0' && ch <= '9')
-                    || ch == '-'
-                    || ch == '.'
-                    || ch == '/'
-                    || ch == '_') {
-                sb.append(ch);
-                pos++;
-            } else {
+            if (ch == ':' || ch == '@' || ch == '|' || ch == '>' || ch == ';') {
                 break;
             }
+            sb.append(ch);
+            pos++;
         }
         return sb.toString();
     }
