@@ -19,10 +19,36 @@ public class TransformOption {
 
     private final String opcode;
     private final String argument;
+    private final String selector;
 
-    public TransformOption(String opcode, String argument) {
+    public static TransformOption ofRemoveParent(String selector) {
+        return new TransformOption("removeParent", ":", selector);
+    }
+
+    public static TransformOption ofRemoveParent(String matcher, String selector) {
+        return new TransformOption("removeParent", matcher, selector);
+    }
+
+    public static TransformOption ofRemovePlugin(String matcher, String selector) {
+        return new TransformOption("removePlugin", matcher, selector);
+    }
+
+    public static TransformOption ofRemoveDependency(String matcher, String selector) {
+        return new TransformOption("removeDependency", matcher, selector);
+    }
+
+    public static TransformOption ofRemoveSubproject(String matcher, String selector) {
+        return new TransformOption("removeSubproject", matcher, selector);
+    }
+
+    public static TransformOption ofAddDependency(String matcher, String selector) {
+        return new TransformOption("addDependency", matcher, selector);
+    }
+
+    private TransformOption(String opcode, String argument, String selector) {
         this.opcode = opcode;
         this.argument = argument;
+        this.selector = selector;
     }
 
     public String getOpcode() {
@@ -31,5 +57,9 @@ public class TransformOption {
 
     public String getArgument() {
         return argument;
+    }
+
+    public String getSelector() {
+        return selector;
     }
 }
