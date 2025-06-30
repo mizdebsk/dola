@@ -1,6 +1,6 @@
 # Debug enable flag.
 # Setting this to non-empty value enables debugging output.
-%__dolagen_debug 1
+%__dolagen_debug %nil
 
 # Specify which dependency generators should be ran.
 # Values should be a space-separated list of qualified class names of
