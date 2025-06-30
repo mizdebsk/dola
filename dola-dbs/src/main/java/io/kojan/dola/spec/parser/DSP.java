@@ -44,6 +44,8 @@ public class DSP {
     // Position of End-Of-File
     private final int eof;
 
+    private final boolean enableInlineBuildOptions = true;
+
     public DSP(String s) {
         buf = s;
         pos = 0;
@@ -152,7 +154,6 @@ public class DSP {
             sb.append(" ".repeat(pos - lineStart));
             sb.append("^--- here");
         }
-        System.err.println(sb);
         throw new SpecParseException(sb.toString());
     }
 
@@ -584,7 +585,16 @@ public class DSP {
             String val = parseUntilEol();
             return BuildOpt.of(val, c);
         }
-        return null;
+        if (!enableInlineBuildOptions) {
+            return null;
+        }
+        if (has("%")) {
+            pos--;
+            return null;
+        }
+        popCommentIgnore();
+        String val = parseUntilEol();
+        return BuildOpt.of(val, List.of());
     }
 
     private List<String> parseDescriptionMain() throws SpecParseException {
