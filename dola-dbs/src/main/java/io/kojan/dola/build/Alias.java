@@ -15,6 +15,8 @@
  */
 package io.kojan.dola.build;
 
+import java.util.Objects;
+
 public class Alias {
     private final String groupId;
     private final String artifactId;
@@ -46,5 +48,22 @@ public class Alias {
 
     public String getClassifier() {
         return classifier;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(artifactId, classifier, extension, groupId);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
+        Alias other = (Alias) obj;
+        return Objects.equals(artifactId, other.artifactId)
+                && Objects.equals(classifier, other.classifier)
+                && Objects.equals(extension, other.extension)
+                && Objects.equals(groupId, other.groupId);
     }
 }
