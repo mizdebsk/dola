@@ -15,7 +15,7 @@
  */
 package io.kojan.dola.generator.transformer;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,11 +24,11 @@ import org.easymock.EasyMock;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-public class TransformerHookTest {
+class TransformerHookTest {
     @TempDir private Path buildRoot;
 
     @Test
-    public void testManifestInjection() throws Exception {
+    void manifestInjection() throws Exception {
         Path jarPath = buildRoot.resolve("some/prefix/abc.jar");
         Files.createDirectories(buildRoot.resolve("some/prefix"));
         Files.createDirectories(buildRoot.resolve("another/dir"));
@@ -40,12 +40,13 @@ public class TransformerHookTest {
         generator.addDirectoryPrefix(Path.of("/another/dir"));
         generator.run();
         try (JarInputStream jis = new JarInputStream(Files.newInputStream(jarPath))) {
-            assertEquals("Test", jis.getManifest().getMainAttributes().getValue("Injected"));
+            assertThat(jis.getManifest().getMainAttributes().getValue("Injected"))
+                    .isEqualTo("Test");
         }
     }
 
     @Test
-    public void testInvalidJar() throws Exception {
+    void invalidJar() throws Exception {
         Path jarPath = buildRoot.resolve("some/prefix/abc.jar");
         Files.createDirectories(buildRoot.resolve("some/prefix"));
         Files.copy(Path.of("src/test/resources/invalid.jar"), jarPath);
@@ -58,7 +59,7 @@ public class TransformerHookTest {
     }
 
     @Test
-    public void testPrefixMismatch() throws Exception {
+    void prefixMismatch() throws Exception {
         Path jarPath = buildRoot.resolve("some/prefix/abc.jar");
         Files.createDirectories(buildRoot.resolve("some/prefix"));
         Files.createDirectories(buildRoot.resolve("mismatched/prefix"));

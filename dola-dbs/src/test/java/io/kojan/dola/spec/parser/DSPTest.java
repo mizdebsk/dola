@@ -15,7 +15,7 @@
  */
 package io.kojan.dola.spec.parser;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -188,11 +188,11 @@ class DSPTest {
                 // "xmvn5",
                 "xz-java",
             })
-    void testPkg(String pkg) throws Exception {
+    void pkg(String pkg) throws Exception {
         Path p = Path.of("src/test/resources/dsp").resolve(pkg + ".spec");
         String s = Files.readString(p);
         DSP dsp = new DSP(s);
         dsp.parseSpec();
-        assertTrue(true);
+        assertThat(true).isTrue();
     }
 }

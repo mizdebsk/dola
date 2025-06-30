@@ -15,7 +15,7 @@
  */
 package io.kojan.dola.generator.jpms;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import io.kojan.dola.generator.Collector;
 import java.io.InputStream;
@@ -37,7 +37,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-public class ModuleInfoGleanerTest {
+class ModuleInfoGleanerTest {
     @TempDir private Path srcDir;
 
     @TempDir private Path binDir;
@@ -48,7 +48,7 @@ public class ModuleInfoGleanerTest {
     private ModuleInfoGleaner gleaner;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         collector = EasyMock.createStrictMock(Collector.class);
         filePath = Path.of("something");
         gleaner = new ModuleInfoGleaner(filePath, collector);
@@ -78,21 +78,21 @@ public class ModuleInfoGleanerTest {
     }
 
     @Test
-    public void testNoRequires() throws Exception {
+    void noRequires() throws Exception {
         mod("mymod", "1.2.3").build();
         expectProvides("jpms(mymod) = 1.2.3");
         performTest();
     }
 
     @Test
-    public void testNoVersion() throws Exception {
+    void noVersion() throws Exception {
         mod("mymod", null).build();
         expectProvides("jpms(mymod)");
         performTest();
     }
 
     @Test
-    public void testRequireIntransitive() throws Exception {
+    void requireIntransitive() throws Exception {
         mod("dep", "1").build();
         mod("mymod", "2").req("dep").build();
         expectProvides("jpms(mymod) = 2");
@@ -100,7 +100,7 @@ public class ModuleInfoGleanerTest {
     }
 
     @Test
-    public void testRequireTransitive() throws Exception {
+    void requireTransitive() throws Exception {
         mod("dep", "1").build();
         mod("mymod", "2").req("transitive dep").build();
         expectProvides("jpms(mymod) = 2");
@@ -109,7 +109,7 @@ public class ModuleInfoGleanerTest {
     }
 
     @Test
-    public void testRequireStatic() throws Exception {
+    void requireStatic() throws Exception {
         mod("dep", "1").build();
         mod("mymod", "2").req("static dep").build();
         expectProvides("jpms(mymod) = 2");
@@ -117,7 +117,7 @@ public class ModuleInfoGleanerTest {
     }
 
     @Test
-    public void testRequireStaticTransitive() throws Exception {
+    void requireStaticTransitive() throws Exception {
         mod("dep", "1").build();
         mod("mymod", "2").req("static transitive dep").build();
         expectProvides("jpms(mymod) = 2");
@@ -125,7 +125,7 @@ public class ModuleInfoGleanerTest {
     }
 
     @Test
-    public void testTwoRequires() throws Exception {
+    void twoRequires() throws Exception {
         mod("a", "1").build();
         mod("b", null).build();
         mod("c", "3").req("transitive a").req("transitive b").build();
@@ -173,9 +173,9 @@ public class ModuleInfoGleanerTest {
                 CompilationTask task =
                         compiler.getTask(
                                 compilerOutput, fileManager, null, opts, null, compilationUnits);
-                assertTrue(
-                        task.call(),
-                        "module-info compilation failed with output:\n" + compilerOutput);
+                assertThat(task.call())
+                        .as("module-info compilation failed with output:\n" + compilerOutput)
+                        .isTrue();
             }
             modulePath.addFirst(outDir);
         }

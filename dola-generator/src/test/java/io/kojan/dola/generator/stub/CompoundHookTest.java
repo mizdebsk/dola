@@ -15,10 +15,8 @@
  */
 package io.kojan.dola.generator.stub;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 import io.kojan.dola.generator.BuildContext;
 import io.kojan.dola.generator.Hook;
@@ -46,9 +44,9 @@ class TestHookFactory2 implements HookFactory {
     }
 }
 
-public class CompoundHookTest {
+class CompoundHookTest {
     @Test
-    public void testCompoundHook() {
+    void compoundHook() {
         BuildContext bc = EasyMock.createMock(BuildContext.class);
         EasyMock.expect(bc.eval("%{?__dolagen_post_install_hooks}"))
                 .andReturn(
@@ -66,12 +64,12 @@ public class CompoundHookTest {
         EasyMock.replay(bc, hook1);
         CompoundHook ch = new CompoundHook(bc);
         ch.runHook();
-        assertTrue(TestHookFactory2.hookRan);
+        assertThat(TestHookFactory2.hookRan).isTrue();
         EasyMock.verify(bc, hook1);
     }
 
     @Test
-    public void testClassNotFound() throws Exception {
+    void classNotFound() throws Exception {
         BuildContext bc = EasyMock.createMock(BuildContext.class);
         EasyMock.expect(bc.eval("%{?__dolagen_post_install_hooks}")).andReturn("com.foo.Bar");
         EasyMock.expect(bc.eval("%{?__dolagen_debug}")).andReturn("").anyTimes();
@@ -80,16 +78,16 @@ public class CompoundHookTest {
             new CompoundHook(bc).runHook();
             fail("ClassNotFoundException expected");
         } catch (Throwable t) {
-            assertInstanceOf(RuntimeException.class, t);
+            assertThat(t).isInstanceOf(RuntimeException.class);
             Throwable e = t.getCause();
-            assertInstanceOf(ClassNotFoundException.class, e);
-            assertEquals("com.foo.Bar", e.getMessage());
+            assertThat(e).isInstanceOf(ClassNotFoundException.class);
+            assertThat(e.getMessage()).isEqualTo("com.foo.Bar");
         }
         EasyMock.verify(bc);
     }
 
     @Test
-    public void testClassIsNotFactory() throws Exception {
+    void classIsNotFactory() throws Exception {
         BuildContext bc = EasyMock.createMock(BuildContext.class);
         EasyMock.expect(bc.eval("%{?__dolagen_post_install_hooks}"))
                 .andReturn(CompoundHookTest.class.getName());
@@ -99,13 +97,13 @@ public class CompoundHookTest {
             new CompoundHook(bc).runHook();
             fail("ClassCastException expected");
         } catch (ClassCastException e) {
-            assertTrue(e.getMessage().contains("HookFactory"));
+            assertThat(e.getMessage().contains("HookFactory")).isTrue();
         }
         EasyMock.verify(bc);
     }
 
     @Test
-    public void testNoFactories() throws Exception {
+    void noFactories() throws Exception {
         BuildContext bc = EasyMock.createMock(BuildContext.class);
         EasyMock.expect(bc.eval("%{?__dolagen_post_install_hooks}")).andReturn("");
         EasyMock.expect(bc.eval("%{?__dolagen_debug}")).andReturn("").anyTimes();

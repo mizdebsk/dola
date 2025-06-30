@@ -24,14 +24,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-public class JPackageScriptGeneratorTest {
+class JPackageScriptGeneratorTest {
     private Collector collector;
     private BuildContext context;
 
     @TempDir private Path br;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         collector = EasyMock.createMock(Collector.class);
         context = EasyMock.createMock(BuildContext.class);
         EasyMock.expect(context.eval("%{buildroot}")).andReturn(br.toString()).anyTimes();
@@ -53,19 +53,19 @@ public class JPackageScriptGeneratorTest {
     }
 
     @Test
-    public void testJPackage() throws Exception {
+    void jPackage() throws Exception {
         expectRequires("javapackages-tools");
         expectRequires("java-21-openjdk-headless");
         performTest("jflex");
     }
 
     @Test
-    public void testNonJPackage() throws Exception {
+    void nonJPackage() throws Exception {
         performTest("xmvn");
     }
 
     @Test
-    public void testInvalidUtf8() throws Exception {
+    void invalidUtf8() throws Exception {
         performTest("invalid-utf8");
     }
 }

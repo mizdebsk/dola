@@ -15,12 +15,8 @@
  */
 package io.kojan.dola.generator.transformer;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.io.FileOutputStream;
@@ -36,7 +32,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-public class JarTransformerTest {
+class JarTransformerTest {
     @TempDir private Path workDir;
 
     private Path testResource;
@@ -46,13 +42,13 @@ public class JarTransformerTest {
             new JarTransformer(mf -> mf.getMainAttributes().putValue("X-Key", "X-Value"));
 
     @BeforeEach
-    public void setUp() throws Exception {
+    void setUp() throws Exception {
         prepare("example.jar");
     }
 
     private void prepare(String testResourceName) throws Exception {
         testResource = Path.of("src/test/resources").resolve(testResourceName);
-        assertTrue(Files.isRegularFile(testResource));
+        assertThat(Files.isRegularFile(testResource)).isTrue();
         testJar = workDir.resolve("test.jar");
         Files.copy(
                 testResource,
@@ -66,10 +62,10 @@ public class JarTransformerTest {
         jarTransformer.transformJar(testJar);
         try (JarInputStream jis = new JarInputStream(Files.newInputStream(testJar))) {
             Manifest mf = jis.getManifest();
-            assertNotNull(mf);
+            assertThat(mf).isNotNull();
             Attributes attr = mf.getMainAttributes();
-            assertNotNull(attr);
-            assertEquals("X-Value", attr.getValue("X-Key"));
+            assertThat(attr).isNotNull();
+            assertThat(attr.getValue("X-Key")).isEqualTo("X-Value");
         }
     }
 
@@ -79,7 +75,7 @@ public class JarTransformerTest {
      * @throws Exception
      */
     @Test
-    public void testManifestInjection() throws Exception {
+    void manifestInjection() throws Exception {
         performTest();
     }
 
@@ -90,7 +86,7 @@ public class JarTransformerTest {
      * @throws Exception
      */
     @Test
-    public void testManifestInjectionLateManifest() throws Exception {
+    void manifestInjectionLateManifest() throws Exception {
         prepare("late-manifest.jar");
         performTest();
     }
@@ -102,7 +98,7 @@ public class JarTransformerTest {
      * @throws Exception
      */
     @Test
-    public void testManifestInjectionRecompressionCausesSizeMismatch() throws Exception {
+    void manifestInjectionRecompressionCausesSizeMismatch() throws Exception {
         prepare("recompression-size.jar");
         performTest();
     }
@@ -113,7 +109,7 @@ public class JarTransformerTest {
      * @throws Exception
      */
     @Test
-    public void testManifestInjectionDuplicateManifest() throws Exception {
+    void manifestInjectionDuplicateManifest() throws Exception {
         prepare("duplicate-manifest.jar");
         performTest();
     }
@@ -124,13 +120,13 @@ public class JarTransformerTest {
      * @throws Exception
      */
     @Test
-    public void testManifestInjectionSanePermissions() throws Exception {
+    void manifestInjectionSanePermissions() throws Exception {
         assumeTrue(
                 Files.getPosixFilePermissions(testJar).contains(PosixFilePermission.OTHERS_READ),
                 "sane umask");
         performTest();
-        assertTrue(
-                Files.getPosixFilePermissions(testJar).contains(PosixFilePermission.OTHERS_READ));
+        assertThat(Files.getPosixFilePermissions(testJar).contains(PosixFilePermission.OTHERS_READ))
+                .isTrue();
     }
 
     /**
@@ -139,12 +135,12 @@ public class JarTransformerTest {
      * @throws Exception
      */
     @Test
-    public void testInvalidJar() throws Exception {
+    void invalidJar() throws Exception {
         prepare("invalid.jar");
         jarTransformer.transformJar(testJar);
         byte[] testJarContent = Files.readAllBytes(testJar);
         byte[] testResourceContent = Files.readAllBytes(testResource);
-        assertTrue(Arrays.equals(testJarContent, testResourceContent));
+        assertThat(Arrays.equals(testJarContent, testResourceContent)).isTrue();
     }
 
     /**
@@ -153,11 +149,11 @@ public class JarTransformerTest {
      * @throws Exception
      */
     @Test
-    public void testSameINode() throws Exception {
+    void sameINode() throws Exception {
         long oldInode = (Long) Files.getAttribute(testJar, "unix:ino");
         performTest();
         long newInode = (Long) Files.getAttribute(testJar, "unix:ino");
-        assertEquals(oldInode, newInode, "Different manifest I-node after injection");
+        assertThat(newInode).as("Different manifest I-node after injection").isEqualTo(oldInode);
     }
 
     /**
@@ -167,9 +163,9 @@ public class JarTransformerTest {
      * @throws Exception
      */
     @Test
-    public void testBackupDeletion() throws Exception {
+    void backupDeletion() throws Exception {
         performTest();
-        assertFalse(Files.exists(backupPath));
+        assertThat(Files.exists(backupPath)).isFalse();
     }
 
     /**
@@ -179,23 +175,24 @@ public class JarTransformerTest {
      * @throws Exception
      */
     @Test
-    public void testBackupOnFailure() throws Exception {
+    void backupOnFailure() throws Exception {
         byte[] content = Files.readAllBytes(testJar);
         jarTransformer =
                 new JarTransformer(
                         mf -> {
                             throw new RuntimeException("boom");
                         });
-        Exception ex = assertThrows(Exception.class, this::performTest);
-        assertTrue(
-                ex.getMessage().contains(backupPath.toString()),
-                "An exception thrown when injecting manifest does not mention stored backup file");
-        assertTrue(Files.exists(backupPath));
+        Exception ex =
+                assertThatExceptionOfType(Exception.class).isThrownBy(this::performTest).actual();
+        assertThat(ex.getMessage().contains(backupPath.toString()))
+                .as(
+                        "An exception thrown when injecting manifest does not mention stored backup file")
+                .isTrue();
+        assertThat(Files.exists(backupPath)).isTrue();
         byte[] backupContent = Files.readAllBytes(backupPath);
-        assertArrayEquals(
-                content,
-                backupContent,
-                "Content of the backup file is different from the content of the original file");
+        assertThat(backupContent)
+                .as("Content of the backup file is different from the content of the original file")
+                .containsExactly(content);
         Files.copy(
                 testResource,
                 testJar,
@@ -206,11 +203,10 @@ public class JarTransformerTest {
             /// will be retained
             os.write(0);
         }
-        assertThrows(Exception.class, this::performTest);
-        assertArrayEquals(
-                backupContent,
-                Files.readAllBytes(backupPath),
-                "Backup file content was overwritten after an unsuccessful injection");
+        assertThatExceptionOfType(Exception.class).isThrownBy(this::performTest);
+        assertThat(Files.readAllBytes(backupPath))
+                .as("Backup file content was overwritten after an unsuccessful injection")
+                .containsExactly(backupContent);
         Files.delete(backupPath);
     }
 
@@ -220,12 +216,11 @@ public class JarTransformerTest {
      * @throws Exception
      */
     @Test
-    public void testFailWhenBachupPresent() throws Exception {
+    void failWhenBachupPresent() throws Exception {
         Files.writeString(backupPath, "something");
-        assertThrows(
-                Exception.class,
-                this::performTest,
-                "Expected failure because the the backup file already exists");
-        assertTrue(Files.exists(backupPath));
+        assertThatExceptionOfType(Exception.class)
+                .as("Expected failure because the the backup file already exists")
+                .isThrownBy(this::performTest);
+        assertThat(Files.exists(backupPath)).isTrue();
     }
 }

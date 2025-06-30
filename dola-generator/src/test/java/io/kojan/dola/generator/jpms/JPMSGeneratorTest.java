@@ -24,14 +24,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-public class JPMSGeneratorTest {
+class JPMSGeneratorTest {
     private Collector collector;
     private BuildContext context;
 
     @TempDir private Path br;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         collector = EasyMock.createMock(Collector.class);
         context = EasyMock.createMock(BuildContext.class);
         EasyMock.expect(context.eval("%{buildroot}")).andReturn(br.toString()).anyTimes();
@@ -51,7 +51,7 @@ public class JPMSGeneratorTest {
     }
 
     @Test
-    public void testSimpleJar() throws Exception {
+    void simpleJar() throws Exception {
         Path srcPath = Path.of("src/test/resources/simple.jar");
         Path jarPath = br.resolve("usr/share/java/simple.jar");
         expectProvides(jarPath, "jpms(foo)");
@@ -59,7 +59,7 @@ public class JPMSGeneratorTest {
     }
 
     @Test
-    public void testMultiReleaseJar() throws Exception {
+    void multiReleaseJar() throws Exception {
         Path srcPath = Path.of("src/test/resources/mr.jar");
         Path jarPath = br.resolve("usr/lib/java/mr.jar");
         expectProvides(jarPath, "jpms(foo)");

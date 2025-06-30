@@ -15,7 +15,7 @@
  */
 package io.kojan.dola.generator.transformer;
 
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import io.kojan.dola.generator.BuildContext;
 import io.kojan.dola.generator.Hook;
@@ -23,9 +23,9 @@ import io.kojan.dola.generator.HookFactory;
 import org.easymock.EasyMock;
 import org.junit.jupiter.api.Test;
 
-public class TransformerHookFactoryTest {
+class TransformerHookFactoryTest {
     @Test
-    public void testFactory() {
+    void factory() {
         BuildContext bc = EasyMock.createStrictMock(BuildContext.class);
         EasyMock.expect(bc.eval("%{NAME}")).andReturn("myname");
         EasyMock.expect(bc.eval("%{?EPOCH}")).andReturn("");
@@ -37,7 +37,7 @@ public class TransformerHookFactoryTest {
         EasyMock.replay(bc);
         HookFactory factory = new TransformerHookFactory();
         Hook hook = factory.createHook(bc);
-        assertInstanceOf(TransformerHook.class, hook);
+        assertThat(hook).isInstanceOf(TransformerHook.class);
         EasyMock.verify(bc);
     }
 }

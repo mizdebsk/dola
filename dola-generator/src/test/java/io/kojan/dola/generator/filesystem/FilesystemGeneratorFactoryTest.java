@@ -15,7 +15,7 @@
  */
 package io.kojan.dola.generator.filesystem;
 
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import io.kojan.dola.generator.BuildContext;
 import io.kojan.dola.generator.Generator;
@@ -23,14 +23,14 @@ import io.kojan.dola.generator.GeneratorFactory;
 import org.easymock.EasyMock;
 import org.junit.jupiter.api.Test;
 
-public class FilesystemGeneratorFactoryTest {
+class FilesystemGeneratorFactoryTest {
     @Test
-    public void testFactory() {
+    void factory() {
         BuildContext bc = EasyMock.createStrictMock(BuildContext.class);
         EasyMock.replay(bc);
         GeneratorFactory factory = new FilesystemGeneratorFactory();
         Generator gen = factory.createGenerator(bc);
-        assertInstanceOf(FilesystemGenerator.class, gen);
+        assertThat(gen).isInstanceOf(FilesystemGenerator.class);
         EasyMock.verify(bc);
     }
 }

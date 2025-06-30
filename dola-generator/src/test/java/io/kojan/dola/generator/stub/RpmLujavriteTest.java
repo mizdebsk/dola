@@ -15,8 +15,7 @@
  */
 package io.kojan.dola.generator.stub;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import io.kojan.dola.generator.BuildContext;
 import java.io.InputStream;
@@ -36,17 +35,17 @@ class RpmLujavriteStub {
     }
 }
 
-public class RpmLujavriteTest {
+class RpmLujavriteTest {
 
     @BeforeAll
-    public static void setUpClass() {
+    static void setUpClass() {
         System.load("/usr/lib64/lua/5.4/lujavrite.so");
     }
 
     @Test
-    public void testCallThrougtRpmLujavrite() throws Exception {
+    void callThrougtRpmLujavrite() throws Exception {
         Path javaExecutable = Path.of(ProcessHandle.current().info().command().get());
-        assertTrue(javaExecutable.endsWith(Path.of("bin/java")));
+        assertThat(javaExecutable.endsWith(Path.of("bin/java"))).isTrue();
         Path javaHome = javaExecutable.getParent().getParent();
         Path libjvmPath = javaHome.resolve("lib/server/libjvm.so");
         String classPath = System.getProperty("java.class.path");
@@ -63,11 +62,11 @@ public class RpmLujavriteTest {
         ProcessBuilder pb = new ProcessBuilder("rpm", "-E", macro.toString());
         pb.redirectError(Redirect.INHERIT);
         Process p = pb.start();
-        assertEquals(0, p.waitFor());
+        assertThat(p.waitFor()).isEqualTo(0);
         String out;
         try (InputStream is = p.getInputStream()) {
             out = new String(is.readAllBytes());
         }
-        assertEquals("foo\n12\n12\n7 plus 35 equals 42\n", out);
+        assertThat(out).isEqualTo("foo\n12\n12\n7 plus 35 equals 42\n");
     }
 }
