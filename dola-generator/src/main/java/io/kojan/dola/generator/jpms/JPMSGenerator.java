@@ -18,6 +18,7 @@ package io.kojan.dola.generator.jpms;
 import io.kojan.dola.generator.BuildContext;
 import io.kojan.dola.generator.Collector;
 import io.kojan.dola.generator.Generator;
+import io.kojan.dola.generator.logging.Logger;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -75,7 +76,8 @@ class JPMSGenerator implements Generator {
                                 }
                             }
                         } catch (IOException e) {
-                            e.printStackTrace();
+                            // Continue despite exception
+                            Logger.debug(e);
                         }
                     }
                 } catch (IOException e) {

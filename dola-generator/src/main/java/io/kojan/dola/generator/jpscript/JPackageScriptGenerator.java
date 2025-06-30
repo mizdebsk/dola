@@ -18,6 +18,7 @@ package io.kojan.dola.generator.jpscript;
 import io.kojan.dola.generator.BuildContext;
 import io.kojan.dola.generator.Collector;
 import io.kojan.dola.generator.Generator;
+import io.kojan.dola.generator.logging.Logger;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.MalformedInputException;
@@ -51,7 +52,7 @@ class JPackageScriptGenerator implements Generator {
                 }
             } catch (MalformedInputException e) {
                 // Continue despite exception
-                e.printStackTrace();
+                Logger.debug(e);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
