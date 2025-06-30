@@ -72,6 +72,20 @@ public class PackagingOption {
                 aliases);
     }
 
+    public PackagingOption withTargetRepository(String newTargetRepository) {
+        return new PackagingOption(
+                groupIdGlob,
+                artifactIdGlob,
+                extensionGlob,
+                classifierGlob,
+                versionGlob,
+                targetPackage,
+                newTargetRepository,
+                files,
+                compatVersions,
+                aliases);
+    }
+
     public PackagingOption withFile(String file) {
         List<String> newFiles = new ArrayList<>(files);
         newFiles.add(file);
