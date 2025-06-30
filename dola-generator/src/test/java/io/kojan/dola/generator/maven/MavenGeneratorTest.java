@@ -15,8 +15,7 @@
  */
 package io.kojan.dola.generator.maven;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import io.kojan.dola.generator.BuildContext;
 import io.kojan.dola.generator.Collector;
@@ -172,12 +171,9 @@ class MavenGeneratorTest {
     @Test
     void emptyMetadataFile() throws Exception {
         addMd("");
-        try {
-            performTest();
-            fail("Expected exception to be thrown");
-        } catch (Exception e) {
-            assertThat(e.getMessage().contains("Premature end of file")).isTrue();
-        }
+        assertThatExceptionOfType(Exception.class)
+                .isThrownBy(this::performTest)
+                .withMessageContaining("Premature end of file");
     }
 
     @Disabled("XMvn always ignores invalid metadata files")
@@ -187,29 +183,19 @@ class MavenGeneratorTest {
                 """
                 <?xml version="1.0"?>
                 <evil/>""");
-        try {
-            performTest();
-            fail("Expected exception to be thrown");
-        } catch (Exception e) {
-            assertThat(e.getMessage().contains("Expected root element 'metadata' but found 'evil'"))
-                    .isTrue();
-        }
+        assertThatExceptionOfType(Exception.class)
+                .isThrownBy(this::performTest)
+                .withMessageContaining("Expected root element 'metadata' but found 'evil'");
     }
 
     @Disabled("XMvn always ignores invalid metadata files")
     @Test
     void malformedXmlMetadata() throws Exception {
         addMd("<trololololo");
-        try {
-            performTest();
-            fail("Expected exception to be thrown");
-        } catch (Exception e) {
-            assertThat(
-                            e.getMessage()
-                                    .contains(
-                                            "XML document structures must start and end within the same entity"))
-                    .isTrue();
-        }
+        assertThatExceptionOfType(Exception.class)
+                .isThrownBy(this::performTest)
+                .withMessageContaining(
+                        "XML document structures must start and end within the same entity");
     }
 
     @Test

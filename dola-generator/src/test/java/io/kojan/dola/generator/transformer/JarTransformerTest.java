@@ -182,12 +182,11 @@ class JarTransformerTest {
                         mf -> {
                             throw new RuntimeException("boom");
                         });
-        Exception ex =
-                assertThatExceptionOfType(Exception.class).isThrownBy(this::performTest).actual();
-        assertThat(ex.getMessage().contains(backupPath.toString()))
+        assertThatExceptionOfType(Exception.class)
+                .isThrownBy(this::performTest)
+                .withMessageContaining(backupPath.toString())
                 .as(
-                        "An exception thrown when injecting manifest does not mention stored backup file")
-                .isTrue();
+                        "An exception thrown when injecting manifest does not mention stored backup file");
         assertThat(Files.exists(backupPath)).isTrue();
         byte[] backupContent = Files.readAllBytes(backupPath);
         assertThat(backupContent)

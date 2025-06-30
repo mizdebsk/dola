@@ -16,7 +16,7 @@
 package io.kojan.dola.generator.stub;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import io.kojan.dola.generator.BuildContext;
 import io.kojan.dola.generator.Hook;
@@ -74,15 +74,10 @@ class CompoundHookTest {
         EasyMock.expect(bc.eval("%{?__dolagen_post_install_hooks}")).andReturn("com.foo.Bar");
         EasyMock.expect(bc.eval("%{?__dolagen_debug}")).andReturn("").anyTimes();
         EasyMock.replay(bc);
-        try {
-            new CompoundHook(bc).runHook();
-            fail("ClassNotFoundException expected");
-        } catch (Throwable t) {
-            assertThat(t).isInstanceOf(RuntimeException.class);
-            Throwable e = t.getCause();
-            assertThat(e).isInstanceOf(ClassNotFoundException.class);
-            assertThat(e.getMessage()).isEqualTo("com.foo.Bar");
-        }
+        assertThatExceptionOfType(RuntimeException.class)
+                .isThrownBy(() -> new CompoundHook(bc).runHook())
+                .withCauseInstanceOf(ClassNotFoundException.class)
+                .withMessageContaining("com.foo.Bar");
         EasyMock.verify(bc);
     }
 
@@ -93,12 +88,9 @@ class CompoundHookTest {
                 .andReturn(CompoundHookTest.class.getName());
         EasyMock.expect(bc.eval("%{?__dolagen_debug}")).andReturn("").anyTimes();
         EasyMock.replay(bc);
-        try {
-            new CompoundHook(bc).runHook();
-            fail("ClassCastException expected");
-        } catch (ClassCastException e) {
-            assertThat(e.getMessage().contains("HookFactory")).isTrue();
-        }
+        assertThatExceptionOfType(ClassCastException.class)
+                .isThrownBy(() -> new CompoundHook(bc).runHook())
+                .withMessageContaining("HookFactory");
         EasyMock.verify(bc);
     }
 

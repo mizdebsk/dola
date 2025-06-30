@@ -16,7 +16,7 @@
 package io.kojan.dola.generator.stub;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import io.kojan.dola.generator.BuildContext;
 import io.kojan.dola.generator.Collector;
@@ -183,14 +183,10 @@ class CompoundGeneratorTest {
         EasyMock.expect(bc.eval("%{?__dolagen_debug}")).andReturn("").anyTimes();
         EasyMock.expect(bc.eval("%{?__dolagen_protocol}")).andReturn("").anyTimes();
         EasyMock.replay(bc);
-        try {
-            new CompoundGenerator(bc).runGenerator("provides");
-            fail("ClassNotFoundException expected");
-        } catch (RuntimeException e) {
-            Throwable c = e.getCause();
-            assertThat(c).isInstanceOf(ClassNotFoundException.class);
-            assertThat(c.getMessage()).isEqualTo("com.foo.Bar");
-        }
+        assertThatExceptionOfType(RuntimeException.class)
+                .isThrownBy(() -> new CompoundGenerator(bc).runGenerator("provides"))
+                .withCauseInstanceOf(ClassNotFoundException.class)
+                .withMessageContaining("com.foo.Bar");
         EasyMock.verify(bc);
     }
 
@@ -204,12 +200,9 @@ class CompoundGeneratorTest {
         EasyMock.expect(bc.eval("%{?__dolagen_debug}")).andReturn("").anyTimes();
         EasyMock.expect(bc.eval("%{?__dolagen_protocol}")).andReturn("").anyTimes();
         EasyMock.replay(bc);
-        try {
-            new CompoundGenerator(bc).runGenerator("provides");
-            fail("ClassCastException expected");
-        } catch (ClassCastException e) {
-            assertThat(e.getMessage().contains("GeneratorFactory")).isTrue();
-        }
+        assertThatExceptionOfType(ClassCastException.class)
+                .isThrownBy(() -> new CompoundGenerator(bc).runGenerator("provides"))
+                .withMessageContaining("GeneratorFactory");
         EasyMock.verify(bc);
     }
 
