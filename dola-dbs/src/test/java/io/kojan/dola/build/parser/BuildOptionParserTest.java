@@ -15,7 +15,7 @@
  */
 package io.kojan.dola.build.parser;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import io.kojan.dola.build.DeclarativeBuild;
 import io.kojan.dola.build.DeclarativeBuildBuilder;
@@ -32,91 +32,91 @@ class BuildOptionParserTest {
         BuildOptionParser p = new BuildOptionParser(s, cb);
         p.parse();
         c = cb.build();
-        assertEquals(1, c.getPackagingOptions().size());
+        assertThat(c.getPackagingOptions().size()).isEqualTo(1);
         r = c.getPackagingOptions().getFirst();
     }
 
     @Test
-    void testFile() {
+    void file() {
         parse("=gid:aid>foo/bar");
-        assertEquals("gid", r.getGroupIdGlob());
-        assertEquals("aid", r.getArtifactIdGlob());
-        assertEquals("", r.getExtensionGlob());
-        assertEquals("", r.getClassifierGlob());
-        assertEquals("", r.getVersionGlob());
-        assertEquals("", r.getTargetPackage());
-        assertEquals(0, r.getAliases().size());
-        assertEquals(0, r.getCompatVersions().size());
-        assertEquals(1, r.getFiles().size());
-        assertEquals("foo/bar", r.getFiles().getFirst());
+        assertThat(r.getGroupIdGlob()).isEqualTo("gid");
+        assertThat(r.getArtifactIdGlob()).isEqualTo("aid");
+        assertThat(r.getExtensionGlob()).isEqualTo("");
+        assertThat(r.getClassifierGlob()).isEqualTo("");
+        assertThat(r.getVersionGlob()).isEqualTo("");
+        assertThat(r.getTargetPackage()).isEqualTo("");
+        assertThat(r.getAliases().size()).isEqualTo(0);
+        assertThat(r.getCompatVersions().size()).isEqualTo(0);
+        assertThat(r.getFiles().size()).isEqualTo(1);
+        assertThat(r.getFiles().getFirst()).isEqualTo("foo/bar");
     }
 
     @Test
     void testPackage() {
         parse("=gid:aid@pkgg1");
-        assertEquals("gid", r.getGroupIdGlob());
-        assertEquals("aid", r.getArtifactIdGlob());
-        assertEquals("", r.getExtensionGlob());
-        assertEquals("", r.getClassifierGlob());
-        assertEquals("", r.getVersionGlob());
-        assertEquals("pkgg1", r.getTargetPackage());
-        assertEquals(0, r.getAliases().size());
-        assertEquals(0, r.getCompatVersions().size());
-        assertEquals(0, r.getFiles().size());
+        assertThat(r.getGroupIdGlob()).isEqualTo("gid");
+        assertThat(r.getArtifactIdGlob()).isEqualTo("aid");
+        assertThat(r.getExtensionGlob()).isEqualTo("");
+        assertThat(r.getClassifierGlob()).isEqualTo("");
+        assertThat(r.getVersionGlob()).isEqualTo("");
+        assertThat(r.getTargetPackage()).isEqualTo("pkgg1");
+        assertThat(r.getAliases().size()).isEqualTo(0);
+        assertThat(r.getCompatVersions().size()).isEqualTo(0);
+        assertThat(r.getFiles().size()).isEqualTo(0);
     }
 
     @Test
-    void testAlias() {
+    void alias() {
         parse("=gid:aid|ag:aa");
-        assertEquals("gid", r.getGroupIdGlob());
-        assertEquals("aid", r.getArtifactIdGlob());
-        assertEquals("", r.getExtensionGlob());
-        assertEquals("", r.getClassifierGlob());
-        assertEquals("", r.getVersionGlob());
-        assertEquals("", r.getTargetPackage());
-        assertEquals(1, r.getAliases().size());
-        assertEquals("ag", r.getAliases().getFirst().getGroupId());
-        assertEquals("aa", r.getAliases().getFirst().getArtifactId());
-        assertEquals("", r.getAliases().getFirst().getExtension());
-        assertEquals("", r.getAliases().getFirst().getClassifier());
-        assertEquals(0, r.getCompatVersions().size());
-        assertEquals(0, r.getFiles().size());
+        assertThat(r.getGroupIdGlob()).isEqualTo("gid");
+        assertThat(r.getArtifactIdGlob()).isEqualTo("aid");
+        assertThat(r.getExtensionGlob()).isEqualTo("");
+        assertThat(r.getClassifierGlob()).isEqualTo("");
+        assertThat(r.getVersionGlob()).isEqualTo("");
+        assertThat(r.getTargetPackage()).isEqualTo("");
+        assertThat(r.getAliases().size()).isEqualTo(1);
+        assertThat(r.getAliases().getFirst().getGroupId()).isEqualTo("ag");
+        assertThat(r.getAliases().getFirst().getArtifactId()).isEqualTo("aa");
+        assertThat(r.getAliases().getFirst().getExtension()).isEqualTo("");
+        assertThat(r.getAliases().getFirst().getClassifier()).isEqualTo("");
+        assertThat(r.getCompatVersions().size()).isEqualTo(0);
+        assertThat(r.getFiles().size()).isEqualTo(0);
     }
 
     @Test
-    void testVersion() {
+    void version() {
         parse("=gid:aid;42");
-        assertEquals("gid", r.getGroupIdGlob());
-        assertEquals("aid", r.getArtifactIdGlob());
-        assertEquals("", r.getExtensionGlob());
-        assertEquals("", r.getClassifierGlob());
-        assertEquals("", r.getVersionGlob());
-        assertEquals("", r.getTargetPackage());
-        assertEquals(0, r.getAliases().size());
-        assertEquals(1, r.getCompatVersions().size());
-        assertEquals("42", r.getCompatVersions().getFirst());
-        assertEquals(0, r.getFiles().size());
+        assertThat(r.getGroupIdGlob()).isEqualTo("gid");
+        assertThat(r.getArtifactIdGlob()).isEqualTo("aid");
+        assertThat(r.getExtensionGlob()).isEqualTo("");
+        assertThat(r.getClassifierGlob()).isEqualTo("");
+        assertThat(r.getVersionGlob()).isEqualTo("");
+        assertThat(r.getTargetPackage()).isEqualTo("");
+        assertThat(r.getAliases().size()).isEqualTo(0);
+        assertThat(r.getCompatVersions().size()).isEqualTo(1);
+        assertThat(r.getCompatVersions().getFirst()).isEqualTo("42");
+        assertThat(r.getFiles().size()).isEqualTo(0);
     }
 
     @Test
-    void testCombined() {
+    void combined() {
         parse("=gid:aid;1.2|:aa>file1>file2@pkg;3.4");
-        assertEquals("gid", r.getGroupIdGlob());
-        assertEquals("aid", r.getArtifactIdGlob());
-        assertEquals("", r.getExtensionGlob());
-        assertEquals("", r.getClassifierGlob());
-        assertEquals("", r.getVersionGlob());
-        assertEquals("pkg", r.getTargetPackage());
-        assertEquals(1, r.getAliases().size());
-        assertEquals("", r.getAliases().getFirst().getGroupId());
-        assertEquals("aa", r.getAliases().getFirst().getArtifactId());
-        assertEquals("", r.getAliases().getFirst().getExtension());
-        assertEquals("", r.getAliases().getFirst().getClassifier());
-        assertEquals(2, r.getCompatVersions().size());
-        assertEquals("1.2", r.getCompatVersions().get(0));
-        assertEquals("3.4", r.getCompatVersions().get(1));
-        assertEquals(2, r.getFiles().size());
-        assertEquals("file1", r.getFiles().get(0));
-        assertEquals("file2", r.getFiles().get(1));
+        assertThat(r.getGroupIdGlob()).isEqualTo("gid");
+        assertThat(r.getArtifactIdGlob()).isEqualTo("aid");
+        assertThat(r.getExtensionGlob()).isEqualTo("");
+        assertThat(r.getClassifierGlob()).isEqualTo("");
+        assertThat(r.getVersionGlob()).isEqualTo("");
+        assertThat(r.getTargetPackage()).isEqualTo("pkg");
+        assertThat(r.getAliases().size()).isEqualTo(1);
+        assertThat(r.getAliases().getFirst().getGroupId()).isEqualTo("");
+        assertThat(r.getAliases().getFirst().getArtifactId()).isEqualTo("aa");
+        assertThat(r.getAliases().getFirst().getExtension()).isEqualTo("");
+        assertThat(r.getAliases().getFirst().getClassifier()).isEqualTo("");
+        assertThat(r.getCompatVersions().size()).isEqualTo(2);
+        assertThat(r.getCompatVersions().get(0)).isEqualTo("1.2");
+        assertThat(r.getCompatVersions().get(1)).isEqualTo("3.4");
+        assertThat(r.getFiles().size()).isEqualTo(2);
+        assertThat(r.getFiles().get(0)).isEqualTo("file1");
+        assertThat(r.getFiles().get(1)).isEqualTo("file2");
     }
 }

@@ -15,16 +15,16 @@
  */
 package io.kojan.dola.generator.transformer;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import io.kojan.dola.generator.BuildContext;
 import java.util.jar.Manifest;
 import org.easymock.EasyMock;
 import org.junit.jupiter.api.Test;
 
-public class ManifestInjectorTest {
+class ManifestInjectorTest {
     @Test
-    public void testManifestInjector() {
+    void manifestInjector() {
         BuildContext bc = EasyMock.createStrictMock(BuildContext.class);
         EasyMock.expect(bc.eval("%{NAME}")).andReturn("nn");
         EasyMock.expect(bc.eval("%{?EPOCH}")).andReturn("ee");
@@ -35,11 +35,11 @@ public class ManifestInjectorTest {
         mf.getMainAttributes().putValue("Foo", "xx");
         ManifestInjector manifestInjector = new ManifestInjector(bc);
         manifestInjector.transform(mf);
-        assertEquals("xx", mf.getMainAttributes().getValue("Foo"));
-        assertEquals("nn", mf.getMainAttributes().getValue("Rpm-Name"));
-        assertEquals("ee", mf.getMainAttributes().getValue("Rpm-Epoch"));
-        assertEquals("vv", mf.getMainAttributes().getValue("Rpm-Version"));
-        assertEquals("rr", mf.getMainAttributes().getValue("Rpm-Release"));
+        assertThat(mf.getMainAttributes().getValue("Foo")).isEqualTo("xx");
+        assertThat(mf.getMainAttributes().getValue("Rpm-Name")).isEqualTo("nn");
+        assertThat(mf.getMainAttributes().getValue("Rpm-Epoch")).isEqualTo("ee");
+        assertThat(mf.getMainAttributes().getValue("Rpm-Version")).isEqualTo("vv");
+        assertThat(mf.getMainAttributes().getValue("Rpm-Release")).isEqualTo("rr");
         EasyMock.verify(bc);
     }
 }

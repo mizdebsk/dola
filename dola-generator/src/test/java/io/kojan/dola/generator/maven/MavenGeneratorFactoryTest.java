@@ -15,7 +15,7 @@
  */
 package io.kojan.dola.generator.maven;
 
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import io.kojan.dola.generator.BuildContext;
 import io.kojan.dola.generator.Generator;
@@ -23,14 +23,14 @@ import io.kojan.dola.generator.GeneratorFactory;
 import org.easymock.EasyMock;
 import org.junit.jupiter.api.Test;
 
-public class MavenGeneratorFactoryTest {
+class MavenGeneratorFactoryTest {
     @Test
-    public void testFactory() {
+    void factory() {
         BuildContext bc = EasyMock.createStrictMock(BuildContext.class);
         EasyMock.replay(bc);
         GeneratorFactory factory = new MavenGeneratorFactory();
         Generator gen = factory.createGenerator(bc);
-        assertInstanceOf(MavenGenerator.class, gen);
+        assertThat(gen).isInstanceOf(MavenGenerator.class);
         EasyMock.verify(bc);
     }
 }

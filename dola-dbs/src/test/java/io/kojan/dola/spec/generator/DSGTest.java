@@ -15,7 +15,7 @@
  */
 package io.kojan.dola.spec.generator;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import io.kojan.dola.spec.Spec;
 import io.kojan.dola.spec.parser.DSP;
@@ -190,7 +190,7 @@ class DSGTest {
                 // "xmvn5",
                 "xz-java",
             })
-    void testPkg(String pkg) throws Exception {
+    void pkg(String pkg) throws Exception {
         Path p = Path.of("src/test/resources/dsp").resolve(pkg + ".spec");
         String s = Files.readString(p);
         DSP dsp = new DSP(s);
@@ -199,6 +199,6 @@ class DSGTest {
         dsg.optSortScripts = true;
         dsg.generate(spec);
         // Files.writeString(Path.of("/tmp/ppp").resolve(pkg + ".spec"), dsg.toString());
-        assertEquals(s, dsg.toString());
+        assertThat(dsg.toString()).isEqualTo(s);
     }
 }

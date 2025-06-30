@@ -24,14 +24,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-public class FilesystemGeneratorTest {
+class FilesystemGeneratorTest {
     private Collector collector;
     private BuildContext context;
 
     @TempDir private Path br;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         collector = EasyMock.createMock(Collector.class);
         context = EasyMock.createMock(BuildContext.class);
         EasyMock.expect(context.eval("%{buildroot}")).andReturn(br.toString()).anyTimes();
@@ -51,14 +51,14 @@ public class FilesystemGeneratorTest {
     }
 
     @Test
-    public void testJar() throws Exception {
+    void jar() throws Exception {
         Path path = br.resolve("usr/share/java/foo.jar");
         expectRequires(path, "javapackages-filesystem");
         performTest(path);
     }
 
     @Test
-    public void testJavadoc() throws Exception {
+    void javadoc() throws Exception {
         Path path = br.resolve("usr/share/javadoc/foo/index.html");
         expectRequires(path.getParent(), "javapackages-filesystem");
         expectRequires(path, "javapackages-filesystem");
@@ -66,13 +66,13 @@ public class FilesystemGeneratorTest {
     }
 
     @Test
-    public void testNonJava() throws Exception {
+    void nonJava() throws Exception {
         Path path = br.resolve("usr/bin/foo");
         performTest(path);
     }
 
     @Test
-    public void testDirectoryItself() throws Exception {
+    void directoryItself() throws Exception {
         Path path = br.resolve("usr/share/java");
         performTest(path);
     }

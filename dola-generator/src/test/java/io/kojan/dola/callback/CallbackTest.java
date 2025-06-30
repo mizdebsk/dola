@@ -15,22 +15,22 @@
  */
 package io.kojan.dola.callback;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 
-public class CallbackTest {
+class CallbackTest {
     @Test
-    public void testCallback() throws Exception {
+    void callback() throws Exception {
         Semaphore sema = new Semaphore(0);
         Runnable x = sema::release;
         Callback cb = Callback.setUp(x);
         Process p = new ProcessBuilder(cb.getCommand()).inheritIO().start();
         boolean acquired = sema.tryAcquire(5, TimeUnit.SECONDS);
-        assertTrue(acquired);
+        assertThat(acquired).isTrue();
         boolean joined = p.waitFor(5, TimeUnit.SECONDS);
-        assertTrue(joined);
+        assertThat(joined).isTrue();
     }
 }

@@ -15,8 +15,8 @@
  */
 package io.kojan.dola.generator.maven;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 import io.kojan.dola.generator.BuildContext;
 import io.kojan.dola.generator.Collector;
@@ -38,7 +38,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-public class MavenGeneratorTest {
+class MavenGeneratorTest {
     private Collector collector;
     private BuildContext context;
     private MetadataResolver metadataResolver;
@@ -47,7 +47,7 @@ public class MavenGeneratorTest {
     @TempDir private Path br;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         collector = EasyMock.createMock(Collector.class);
         context = EasyMock.createMock(BuildContext.class);
         resolver = EasyMock.createMock(Resolver.class);
@@ -111,12 +111,12 @@ public class MavenGeneratorTest {
     }
 
     @Test
-    public void testNoMetadata() throws Exception {
+    void noMetadata() throws Exception {
         performTest();
     }
 
     @Test
-    public void testNoArtifacts() throws Exception {
+    void noArtifacts() throws Exception {
         addMd(
                 """
                 <?xml version="1.0" encoding="UTF-8"?>
@@ -134,7 +134,7 @@ public class MavenGeneratorTest {
     }
 
     @Test
-    public void testSimple() throws Exception {
+    void simple() throws Exception {
         addMd(
                 """
                 <metadata xmlns="http://fedorahosted.org/xmvn/METADATA/2.3.0">
@@ -170,19 +170,19 @@ public class MavenGeneratorTest {
 
     @Disabled("XMvn always ignores invalid metadata files")
     @Test
-    public void testEmptyMetadataFile() throws Exception {
+    void emptyMetadataFile() throws Exception {
         addMd("");
         try {
             performTest();
             fail("Expected exception to be thrown");
         } catch (Exception e) {
-            assertTrue(e.getMessage().contains("Premature end of file"));
+            assertThat(e.getMessage().contains("Premature end of file")).isTrue();
         }
     }
 
     @Disabled("XMvn always ignores invalid metadata files")
     @Test
-    public void testInvalidMetadata() throws Exception {
+    void invalidMetadata() throws Exception {
         addMd(
                 """
                 <?xml version="1.0"?>
@@ -191,28 +191,29 @@ public class MavenGeneratorTest {
             performTest();
             fail("Expected exception to be thrown");
         } catch (Exception e) {
-            assertTrue(
-                    e.getMessage().contains("Expected root element 'metadata' but found 'evil'"));
+            assertThat(e.getMessage().contains("Expected root element 'metadata' but found 'evil'"))
+                    .isTrue();
         }
     }
 
     @Disabled("XMvn always ignores invalid metadata files")
     @Test
-    public void testMalformedXmlMetadata() throws Exception {
+    void malformedXmlMetadata() throws Exception {
         addMd("<trololololo");
         try {
             performTest();
             fail("Expected exception to be thrown");
         } catch (Exception e) {
-            assertTrue(
-                    e.getMessage()
-                            .contains(
-                                    "XML document structures must start and end within the same entity"));
+            assertThat(
+                            e.getMessage()
+                                    .contains(
+                                            "XML document structures must start and end within the same entity"))
+                    .isTrue();
         }
     }
 
     @Test
-    public void testCompressedMetadata() throws Exception {
+    void compressedMetadata() throws Exception {
         String metadata =
                 """
                 <metadata xmlns="http://fedorahosted.org/xmvn/METADATA/2.3.0">
@@ -253,7 +254,7 @@ public class MavenGeneratorTest {
     }
 
     @Test
-    public void testSingleNamespace() throws Exception {
+    void singleNamespace() throws Exception {
         addMd(
                 """
                 <metadata xmlns="http://fedorahosted.org/xmvn/METADATA/2.3.0">
@@ -311,7 +312,7 @@ public class MavenGeneratorTest {
     }
 
     @Test
-    public void testMultiNamespace() throws Exception {
+    void multiNamespace() throws Exception {
         addMd(
                 """
                 <metadata xmlns="http://fedorahosted.org/xmvn/METADATA/2.3.0">
@@ -369,7 +370,7 @@ public class MavenGeneratorTest {
     }
 
     @Test
-    public void testMultipleMetadata() throws Exception {
+    void multipleMetadata() throws Exception {
         addMd(
                 "md1",
                 """
@@ -437,7 +438,7 @@ public class MavenGeneratorTest {
     }
 
     @Test
-    public void testSystemVersion() throws Exception {
+    void systemVersion() throws Exception {
         addMd(
                 """
                 <metadata xmlns="http://fedorahosted.org/xmvn/METADATA/2.3.0">
@@ -467,7 +468,7 @@ public class MavenGeneratorTest {
     }
 
     @Test
-    public void testExtensionWar() throws Exception {
+    void extensionWar() throws Exception {
         addMd(
                 """
                 <metadata xmlns="http://fedorahosted.org/xmvn/METADATA/2.3.0">
@@ -491,7 +492,7 @@ public class MavenGeneratorTest {
     }
 
     @Test
-    public void testExtensionJar() throws Exception {
+    void extensionJar() throws Exception {
         addMd(
                 """
                 <metadata xmlns="http://fedorahosted.org/xmvn/METADATA/2.3.0">
@@ -514,7 +515,7 @@ public class MavenGeneratorTest {
     }
 
     @Test
-    public void testExtensionPom() throws Exception {
+    void extensionPom() throws Exception {
         addMd(
                 """
                 <metadata xmlns="http://fedorahosted.org/xmvn/METADATA/2.3.0">
@@ -536,7 +537,7 @@ public class MavenGeneratorTest {
 
     // Test for https://bugzilla.redhat.com/show_bug.cgi?id=1017271
     @Test
-    public void testNamespaceRhbz1017271() throws Exception {
+    void namespaceRhbz1017271() throws Exception {
         addMd(
                 """
                 <metadata xmlns="http://fedorahosted.org/xmvn/METADATA/2.3.0">
@@ -557,7 +558,7 @@ public class MavenGeneratorTest {
     }
 
     @Test
-    public void testCompatVersion() throws Exception {
+    void compatVersion() throws Exception {
         addMd(
                 """
                 <metadata xmlns="http://fedorahosted.org/xmvn/METADATA/2.3.0">
@@ -580,7 +581,7 @@ public class MavenGeneratorTest {
     }
 
     @Test
-    public void testAlias() throws Exception {
+    void alias() throws Exception {
         addMd(
                 """
                 <metadata xmlns="http://fedorahosted.org/xmvn/METADATA/2.3.0">
@@ -608,7 +609,7 @@ public class MavenGeneratorTest {
     }
 
     @Test
-    public void testAlias2() throws Exception {
+    void alias2() throws Exception {
         addMd(
                 """
                 <metadata xmlns="http://fedorahosted.org/xmvn/METADATA/2.3.0">
@@ -650,7 +651,7 @@ public class MavenGeneratorTest {
     }
 
     @Test
-    public void testCompatAlias() throws Exception {
+    void compatAlias() throws Exception {
         addMd(
                 """
                 <metadata xmlns="http://fedorahosted.org/xmvn/METADATA/2.3.0">
@@ -684,7 +685,7 @@ public class MavenGeneratorTest {
     }
 
     @Test
-    public void testExtensionJarExplicit() throws Exception {
+    void extensionJarExplicit() throws Exception {
         addMd(
                 """
                 <?xml version="1.0" ?>
@@ -718,7 +719,7 @@ public class MavenGeneratorTest {
     }
 
     @Test
-    public void testDashesInVersion() throws Exception {
+    void dashesInVersion() throws Exception {
         addMd(
                 "F",
                 """
@@ -789,7 +790,7 @@ public class MavenGeneratorTest {
     }
 
     @Test
-    public void testRequireSimple() throws Exception {
+    void requireSimple() throws Exception {
         addMd(
                 """
                 <metadata xmlns="http://fedorahosted.org/xmvn/METADATA/2.3.0">
@@ -837,7 +838,7 @@ public class MavenGeneratorTest {
     }
 
     @Test
-    public void testRequireParent() throws Exception {
+    void requireParent() throws Exception {
         addMd(
                 "R1",
                 """
@@ -910,7 +911,7 @@ public class MavenGeneratorTest {
     }
 
     @Test
-    public void testRequireMulti() throws Exception {
+    void requireMulti() throws Exception {
         addMd(
                 "R0",
                 """
@@ -1092,7 +1093,7 @@ public class MavenGeneratorTest {
     }
 
     @Test
-    public void testRequireMultiNamespace() throws Exception {
+    void requireMultiNamespace() throws Exception {
         addMd(
                 """
                 <metadata xmlns="http://fedorahosted.org/xmvn/METADATA/2.3.0">
@@ -1294,7 +1295,7 @@ public class MavenGeneratorTest {
     }
 
     @Test
-    public void testRequireMultiVersioned() throws Exception {
+    void requireMultiVersioned() throws Exception {
         addMd(
                 "F1",
                 """
@@ -1566,7 +1567,7 @@ public class MavenGeneratorTest {
     }
 
     @Test
-    public void testMixed() throws Exception {
+    void mixed() throws Exception {
         addMd(
                 "F1",
                 """
@@ -1753,7 +1754,7 @@ public class MavenGeneratorTest {
     }
 
     @Test
-    public void testSimpleSubpackage() throws Exception {
+    void simpleSubpackage() throws Exception {
         addMd(
                 "F",
                 """
@@ -1814,7 +1815,7 @@ public class MavenGeneratorTest {
     }
 
     @Test
-    public void testSimpleSubpackage2() throws Exception {
+    void simpleSubpackage2() throws Exception {
         addMd(
                 "F",
                 """
@@ -1883,7 +1884,7 @@ public class MavenGeneratorTest {
     }
 
     @Test
-    public void testSimpleSubpackage3() throws Exception {
+    void simpleSubpackage3() throws Exception {
         addMd(
                 "F",
                 """
@@ -1955,7 +1956,7 @@ public class MavenGeneratorTest {
     }
 
     @Test
-    public void testSimpleSubpackage4() throws Exception {
+    void simpleSubpackage4() throws Exception {
         addMd(
                 "F",
                 """
@@ -2027,7 +2028,7 @@ public class MavenGeneratorTest {
     }
 
     @Test
-    public void testSelfArtifact() throws Exception {
+    void selfArtifact() throws Exception {
         addMd(
                 """
                 <?xml version="1.0" encoding="UTF-8"?>
@@ -2063,7 +2064,7 @@ public class MavenGeneratorTest {
 
     // https://bugzilla.redhat.com/show_bug.cgi?id=1012980
     @Test
-    public void testRequireSkippedRhbz1012980() throws Exception {
+    void requireSkippedRhbz1012980() throws Exception {
         addMd(
                 "R",
                 """
@@ -2125,7 +2126,7 @@ public class MavenGeneratorTest {
 
     // https://bugzilla.redhat.com/show_bug.cgi?id=1017701#c2
     @Test
-    public void testRhbz1017701() throws Exception {
+    void rhbz1017701() throws Exception {
         addMd(
                 "API",
                 """
@@ -2197,7 +2198,7 @@ public class MavenGeneratorTest {
     }
 
     @Test
-    public void testUnknownDep() throws Exception {
+    void unknownDep() throws Exception {
         addMd(
                 """
                 <metadata xmlns="http://fedorahosted.org/xmvn/METADATA/2.3.0">
@@ -2252,7 +2253,7 @@ public class MavenGeneratorTest {
     }
 
     @Test
-    public void testOptionalDep() throws Exception {
+    void optionalDep() throws Exception {
         addMd(
                 """
                 <metadata xmlns="http://fedorahosted.org/xmvn/METADATA/2.3.0">
@@ -2295,7 +2296,7 @@ public class MavenGeneratorTest {
     }
 
     @Test
-    public void testPomDeps() throws Exception {
+    void pomDeps() throws Exception {
         addMd(
                 """
                 <metadata xmlns="http://fedorahosted.org/xmvn/METADATA/2.3.0">
@@ -2360,7 +2361,7 @@ public class MavenGeneratorTest {
     }
 
     @Test
-    public void testPomDepParent() throws Exception {
+    void pomDepParent() throws Exception {
         addMd(
                 """
                 <metadata xmlns="http://fedorahosted.org/xmvn/METADATA/2.3.0">
@@ -2398,7 +2399,7 @@ public class MavenGeneratorTest {
     }
 
     @Test
-    public void testPomDepsNonPomPackaging() throws Exception {
+    void pomDepsNonPomPackaging() throws Exception {
         addMd(
                 """
                 <metadata xmlns="http://fedorahosted.org/xmvn/METADATA/2.3.0">
@@ -2434,7 +2435,7 @@ public class MavenGeneratorTest {
     }
 
     @Test
-    public void testPomDepsWithParent() throws Exception {
+    void pomDepsWithParent() throws Exception {
         addMd(
                 """
                 <metadata xmlns="http://fedorahosted.org/xmvn/METADATA/2.3.0">
@@ -2484,7 +2485,7 @@ public class MavenGeneratorTest {
     }
 
     @Test
-    public void testPomDepsSubpackage() throws Exception {
+    void pomDepsSubpackage() throws Exception {
         addMd(
                 """
                 <!-- POM-only metadata -->
@@ -2553,7 +2554,7 @@ public class MavenGeneratorTest {
     }
 
     @Test
-    public void testPomSelfRequires() throws Exception {
+    void pomSelfRequires() throws Exception {
         addMd(
                 """
                 <metadata>
@@ -2603,7 +2604,7 @@ public class MavenGeneratorTest {
     }
 
     @Test
-    public void testPomRequiresJar() throws Exception {
+    void pomRequiresJar() throws Exception {
         addMd(
                 """
                 <metadata>

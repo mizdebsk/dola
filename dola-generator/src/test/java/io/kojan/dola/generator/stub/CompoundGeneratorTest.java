@@ -15,10 +15,8 @@
  */
 package io.kojan.dola.generator.stub;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 import io.kojan.dola.generator.BuildContext;
 import io.kojan.dola.generator.Collector;
@@ -140,11 +138,11 @@ class TestGeneratorFactory3 implements GeneratorFactory {
     }
 }
 
-public class CompoundGeneratorTest {
+class CompoundGeneratorTest {
     @TempDir Path br;
 
     @Test
-    public void testCompoundGenerator() throws IOException {
+    void compoundGenerator() throws IOException {
         BuildContext bc = EasyMock.createMock(BuildContext.class);
         String generators =
                 "\n"
@@ -171,14 +169,14 @@ public class CompoundGeneratorTest {
         Files.createFile(br.resolve("some/file/two"));
         CompoundGenerator cg = new CompoundGenerator(bc);
         String prov = cg.runGenerator("provides");
-        assertEquals("one\n" + "prov2 = 1.2.3\n" + "", prov);
+        assertThat(prov).isEqualTo("one\n" + "prov2 = 1.2.3\n" + "");
         String req = cg.runGenerator("requires");
-        assertEquals("anotherdep >= 42\n" + "somereq\n" + "", req);
+        assertThat(req).isEqualTo("anotherdep >= 42\n" + "somereq\n" + "");
         EasyMock.verify(bc, gen1);
     }
 
     @Test
-    public void testClassNotFound() throws Exception {
+    void classNotFound() throws Exception {
         BuildContext bc = EasyMock.createMock(BuildContext.class);
         EasyMock.expect(bc.eval("%{?__dolagen_provides_generators}")).andReturn("com.foo.Bar");
         EasyMock.expect(bc.eval("%{?__dolagen_requires_generators}")).andReturn("com.foo.Bar");
@@ -190,14 +188,14 @@ public class CompoundGeneratorTest {
             fail("ClassNotFoundException expected");
         } catch (RuntimeException e) {
             Throwable c = e.getCause();
-            assertInstanceOf(ClassNotFoundException.class, c);
-            assertEquals("com.foo.Bar", c.getMessage());
+            assertThat(c).isInstanceOf(ClassNotFoundException.class);
+            assertThat(c.getMessage()).isEqualTo("com.foo.Bar");
         }
         EasyMock.verify(bc);
     }
 
     @Test
-    public void testClassIsNotFactory() throws Exception {
+    void classIsNotFactory() throws Exception {
         BuildContext bc = EasyMock.createMock(BuildContext.class);
         EasyMock.expect(bc.eval("%{?__dolagen_provides_generators}"))
                 .andReturn(CompoundGeneratorTest.class.getName());
@@ -210,13 +208,13 @@ public class CompoundGeneratorTest {
             new CompoundGenerator(bc).runGenerator("provides");
             fail("ClassCastException expected");
         } catch (ClassCastException e) {
-            assertTrue(e.getMessage().contains("GeneratorFactory"));
+            assertThat(e.getMessage().contains("GeneratorFactory")).isTrue();
         }
         EasyMock.verify(bc);
     }
 
     @Test
-    public void testNoFactories() throws Exception {
+    void noFactories() throws Exception {
         BuildContext bc = EasyMock.createMock(BuildContext.class);
         EasyMock.expect(bc.eval("%{?__dolagen_provides_generators}")).andReturn("");
         EasyMock.expect(bc.eval("%{?__dolagen_requires_generators}")).andReturn("");
@@ -231,12 +229,12 @@ public class CompoundGeneratorTest {
         Files.createDirectories(br.resolve("some/file"));
         Files.createFile(br.resolve("some/file/one"));
         String prov = new CompoundGenerator(bc).runGenerator("provides");
-        assertEquals("", prov);
+        assertThat(prov).isEqualTo("");
         EasyMock.verify(bc);
     }
 
     @Test
-    public void testFiltering() throws Exception {
+    void filtering() throws Exception {
         BuildContext bc = EasyMock.createMock(BuildContext.class);
         EasyMock.expect(bc.eval("%{?__dolagen_provides_generators}"))
                 .andReturn(TGFA.class.getName() + " " + TGFC.class.getName());
@@ -252,14 +250,14 @@ public class CompoundGeneratorTest {
         Files.createFile(br.resolve("some/file/one"));
         CompoundGenerator cg = new CompoundGenerator(bc);
         String prov = cg.runGenerator("provides");
-        assertEquals("ProvA1\n" + "ProvA2\n" + "ProvC1\n" + "ProvC2\n" + "", prov);
+        assertThat(prov).isEqualTo("ProvA1\n" + "ProvA2\n" + "ProvC1\n" + "ProvC2\n" + "");
         String req = cg.runGenerator("requires");
-        assertEquals("ReqB1\n" + "ReqB2\n" + "ReqC1\n" + "ReqC2\n" + "", req);
+        assertThat(req).isEqualTo("ReqB1\n" + "ReqB2\n" + "ReqC1\n" + "ReqC2\n" + "");
         EasyMock.verify(bc);
     }
 
     @Test
-    public void testMultifile() throws Exception {
+    void multifile() throws Exception {
         BuildContext bc = EasyMock.createMock(BuildContext.class);
         EasyMock.expect(bc.eval("%{?__dolagen_provides_generators}"))
                 .andReturn(TestGeneratorFactory3.class.getName());
@@ -284,34 +282,34 @@ public class CompoundGeneratorTest {
         Files.createFile(br.resolve("file66"));
         CompoundGenerator cg = new CompoundGenerator(bc);
         String prov = cg.runGenerator("provides");
-        assertEquals(
-                ";"
-                        + br
-                        + "/f\n"
-                        + "prov1\n"
-                        + //
+        assertThat(prov)
+                .isEqualTo(
                         ";"
-                        + br
-                        + "/f2\n"
-                        + "prov2\n"
-                        + //
-                        ";"
-                        + br
-                        + "/ff3\n"
-                        + "prov3\n"
-                        + //
-                        ";"
-                        + br
-                        + "/file\n"
-                        + "prov4\n"
-                        + //
-                        ";"
-                        + br
-                        + "/file5\n"
-                        + "prov5\n",
-                prov);
+                                + br
+                                + "/f\n"
+                                + "prov1\n"
+                                + //
+                                ";"
+                                + br
+                                + "/f2\n"
+                                + "prov2\n"
+                                + //
+                                ";"
+                                + br
+                                + "/ff3\n"
+                                + "prov3\n"
+                                + //
+                                ";"
+                                + br
+                                + "/file\n"
+                                + "prov4\n"
+                                + //
+                                ";"
+                                + br
+                                + "/file5\n"
+                                + "prov5\n");
         String req = cg.runGenerator("requires");
-        assertEquals(";" + br + "/ff3\n" + "req\n" + "", req);
+        assertThat(req).isEqualTo(";" + br + "/ff3\n" + "req\n" + "");
         EasyMock.verify(bc);
     }
 }

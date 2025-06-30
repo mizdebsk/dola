@@ -22,14 +22,14 @@ import org.easymock.EasyMock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class ManifestGleanerTest {
+class ManifestGleanerTest {
     private Collector collector;
     private Manifest manifest;
     private Path filePath;
     private ManifestGleaner gleaner;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         collector = EasyMock.createStrictMock(Collector.class);
         manifest = new Manifest();
         filePath = Path.of("something");
@@ -52,18 +52,18 @@ public class ManifestGleanerTest {
     }
 
     @Test
-    public void testEmptyManifest() {
+    void emptyManifest() {
         performTest();
     }
 
     @Test
-    public void testNullManifest() {
+    void nullManifest() {
         manifest = null;
         performTest();
     }
 
     @Test
-    public void testSimple() {
+    void simple() {
         updateManifest("Automatic-Module-Name", "foo.bar");
         expectProvides("jpms(foo.bar)");
         performTest();
