@@ -43,7 +43,7 @@ public class Imperator {
         for (var t : ctx.getTransformOptions()) {
             String id = String.format("%03d", i++);
             String key = "dola.transformer.insn." + id + "." + t.getOpcode();
-            String val = t.getArgument();
+            String val = t.getArgument() + "@" + t.getSelector();
             args.add("-D" + key + "=" + val);
         }
         return args;

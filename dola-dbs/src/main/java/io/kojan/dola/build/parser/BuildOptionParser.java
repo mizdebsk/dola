@@ -16,168 +16,276 @@
 package io.kojan.dola.build.parser;
 
 import io.kojan.dola.build.Alias;
+import io.kojan.dola.build.DeclarativeBuild;
 import io.kojan.dola.build.DeclarativeBuildBuilder;
 import io.kojan.dola.build.PackagingOption;
 import io.kojan.dola.build.TransformOption;
+import org.fedoraproject.xmvn.artifact.Artifact;
 
 public class BuildOptionParser {
-    private int pos;
-    private final String str;
-    private final DeclarativeBuildBuilder ctx;
+    private final Lexer lx;
+    private final DeclarativeBuildBuilder db;
 
-    public BuildOptionParser(String str, DeclarativeBuildBuilder ctx) {
-        this.str = str;
-        this.ctx = ctx;
+    BuildOptionParser(Lexer lx, DeclarativeBuildBuilder db) {
+        this.lx = lx;
+        this.db = db;
     }
 
-    private RuntimeException error(String msg) {
-        String p = msg + ":\n  Expr: " + str + "\n" + "  Here: " + (" ".repeat(pos)) + "^";
-        System.err.println(p);
-        return new RuntimeException(p);
+    public BuildOptionParser(String rpmName, String str) {
+        this(new Lexer(str), new DeclarativeBuildBuilder(rpmName));
     }
 
-    private RuntimeException error() {
-        return error("Syntax error");
-    }
-
-    private String rest() {
-        return str.substring(pos);
-    }
-
-    private boolean has(String s) {
-        if (rest().startsWith(s)) {
-            pos += s.length();
+    private boolean tryParseFlag() {
+        if (lx.isKeyword("skipTests")) {
+            db.skipTests(true);
+            return true;
+        }
+        if (lx.isKeyword("singletonPackaging")) {
+            db.singletonPackaging(true);
+            return true;
+        }
+        if (lx.isKeyword("usesJavapackagesBootstrap")) {
+            db.usesJavapackagesBootstrap(true);
             return true;
         }
         return false;
     }
 
-    private boolean is(String s) {
-        return str.length() - pos == s.length() && has(s);
-    }
-
-    private void parseCondition() {
-        throw error("conditions not implemented yet");
-    }
-
-    private void parseTransformOption() {
-        if (has("/dep=")) {
-            ctx.modelTransformation(new TransformOption("removeDependency", rest()));
-        } else if (has("/plug=")) {
-            ctx.modelTransformation(new TransformOption("removePlugin", rest()));
-        } else if (has("/parent=")) {
-            ctx.modelTransformation(new TransformOption("removeParent", rest()));
-        } else if (has("/mod=")) {
-            ctx.modelTransformation(new TransformOption("removeSubproject", rest()));
-        } else if (has("/")) {
-            if (rest().contains(":")) {
-                ctx.modelTransformation(new TransformOption("removeDependency", rest()));
-                ctx.modelTransformation(new TransformOption("removePlugin", rest()));
-                ctx.modelTransformation(new TransformOption("removeParent", rest()));
-            } else {
-                ctx.modelTransformation(new TransformOption("removeSubproject", rest()));
-            }
-        } else if (has("+dep=") || has("+")) {
-            ctx.modelTransformation(new TransformOption("addDependency", rest()));
-        } else {
-            error();
+    private boolean tryParseMavenOptions() {
+        if (lx.isKeyword("mavenOption")) {
+            db.mavenOption(lx.next().expectLiteral());
+            return true;
         }
-    }
-
-    private void parseShortOption() {
-        if (is("Fjpb")) {
-            ctx.usesJavapackagesBootstrap(true);
-        } else if (is("Fs")) {
-            ctx.singletonPackaging(true);
-        } else if (has("P") || has("D") || is("X")) {
-            ctx.mavenOption(str);
-        } else if (is("f")) {
-            ctx.skipTests(true);
-        } else if (has("B")) {
-            if (has("!")) {
-                ctx.filteredBuildReq(org.fedoraproject.xmvn.artifact.Artifact.of(rest()));
-            } else {
-                ctx.extraBuildReq(org.fedoraproject.xmvn.artifact.Artifact.of(rest()));
+        if (lx.isKeyword("mavenOptions")) {
+            lx.next().expectBlockBegin();
+            while (!lx.next().isBlockEnd()) {
+                db.mavenOption(lx.expectLiteral());
             }
-        } else {
-            throw error();
+            return true;
         }
+        return false;
     }
 
-    private void parseLongOption() {
-        throw error();
-    }
-
-    private String parseId() {
-        StringBuilder sb = new StringBuilder();
-        while (pos < str.length()) {
-            char ch = str.charAt(pos);
-            if (ch == ':' || ch == '@' || ch == '|' || ch == '>' || ch == ';') {
-                break;
+    private boolean tryParseTestExcludes() {
+        if (lx.isKeyword("testExclude")) {
+            db.testExclude(lx.next().expectLiteral());
+            return true;
+        }
+        if (lx.isKeyword("testExcludes")) {
+            lx.next().expectBlockBegin();
+            while (!lx.next().isBlockEnd()) {
+                db.testExclude(lx.expectLiteral());
             }
-            sb.append(ch);
-            pos++;
+            return true;
         }
-        return sb.toString();
+        return false;
     }
 
-    private void parsePackagingOption() {
-        String gidGlob = parseId();
-        if (!has(":")) {
-            throw error();
+    private boolean tryParseBuildRequires() {
+        if (lx.isKeyword("buildRequire")) {
+            db.extraBuildReq(Artifact.of(lx.next().expectLiteral()));
+            return true;
         }
-        String aidGlob = parseId();
-        PackagingOption po = PackagingOption.of(gidGlob, aidGlob);
-        while (!is("")) {
-            if (has("@")) {
-                String targetPackage = parseId();
-                po = po.withTargetPackage(targetPackage);
-                continue;
-            }
-            if (has("|")) {
-                String aliasGid = parseId();
-                if (!has(":")) {
-                    throw error();
+        if (lx.isKeyword("buildRequireFilter")) {
+            db.filteredBuildReq(Artifact.of(lx.next().expectLiteral()));
+            return true;
+        }
+        if (lx.isKeyword("buildRequires")) {
+            lx.next().expectBlockBegin();
+            while (!lx.next().isBlockEnd()) {
+                if (lx.isKeyword("filter")) {
+                    db.filteredBuildReq(Artifact.of(lx.next().expectLiteral()));
+                } else {
+                    db.extraBuildReq(Artifact.of(lx.expectLiteral()));
                 }
-                String aliasAid = parseId();
-                po = po.withAlias(Alias.of(aliasGid, aliasAid));
-                continue;
             }
-            if (has(">")) {
-                String file = parseId();
-                po = po.withFile(file);
-                continue;
-            }
-            if (has(";")) {
-                String compatVersion = parseId();
-                po = po.withCompatVersion(compatVersion);
-                continue;
-            }
-            throw error();
+            return true;
         }
-        ctx.packagingOption(po);
+        return false;
     }
 
-    private void parseTestOption() {
-        ctx.testExclude(rest());
+    private PackagingOption parseArtifactSelectorLiteral(String globLiteral) {
+        if (globLiteral.indexOf(':') < 0) {
+            lx.error("Syntax error: artifact glob must contain a colon");
+        }
+        String[] globArray = globLiteral.split(":", 2);
+        return PackagingOption.of(globArray[0], globArray[1]);
     }
 
-    public void parse() {
-        if (has("[")) {
-            parseCondition();
-        } else if (has("--")) {
-            parseLongOption();
-        } else if (has("-")) {
-            parseShortOption();
-        } else if (has("+") || has("/")) {
-            pos--;
-            parseTransformOption();
-        } else if (has("=")) {
-            parsePackagingOption();
-        } else if (has("!")) {
-            parseTestOption();
-        } else {
-            throw error();
+    private Alias parseAliasLiteral(String aliasLiteral) {
+        if (aliasLiteral.indexOf(':') < 0) {
+            lx.error("Syntax error: alias specifier must contain a colon");
         }
+        String[] aliasArray = aliasLiteral.split(":", 2);
+        return Alias.of(aliasArray[0], aliasArray[1]);
+    }
+
+    private boolean tryParsePackagingOptions() {
+        if (!lx.isKeyword("artifact")) {
+            return false;
+        }
+        PackagingOption po = parseArtifactSelectorLiteral(lx.next().expectLiteral());
+        lx.next().expectBlockBegin();
+        while (!lx.next().isBlockEnd()) {
+            if (lx.isKeyword("package")) {
+                if (!po.getTargetPackage().isEmpty()) {
+                    lx.error("Semantic error: duplicate target package specified");
+                }
+                po = po.withTargetPackage(lx.next().expectLiteral());
+            } else if (lx.isKeyword("noInstall")) {
+                if (!po.getTargetPackage().isEmpty()) {
+                    lx.error("Semantic error: duplicate target package specified");
+                }
+                po = po.withTargetPackage("__noinstall");
+            } else if (lx.isKeyword("repository")) {
+                if (!po.getTargetRepository().isEmpty()) {
+                    lx.error("Semantic error: duplicate target repository specified");
+                }
+                po = po.withTargetRepository(lx.next().expectLiteral());
+            } else if (lx.isKeyword("file")) {
+                po = po.withFile(lx.next().expectLiteral());
+            } else if (lx.isKeyword("files")) {
+                lx.next().expectBlockBegin();
+                while (!lx.next().isBlockEnd()) {
+                    po = po.withFile(lx.expectLiteral());
+                }
+            } else if (lx.isKeyword("compatVersion")) {
+                po = po.withCompatVersion(lx.next().expectLiteral());
+            } else if (lx.isKeyword("compatVersions")) {
+                lx.next().expectBlockBegin();
+                while (!lx.next().isBlockEnd()) {
+                    po = po.withCompatVersion(lx.expectLiteral());
+                }
+            } else if (lx.isKeyword("alias")) {
+                po = po.withAlias(parseAliasLiteral(lx.next().expectLiteral()));
+            } else if (lx.isKeyword("aliases")) {
+                lx.next().expectBlockBegin();
+                while (!lx.next().isBlockEnd()) {
+                    po = po.withAlias(parseAliasLiteral(lx.expectLiteral()));
+                }
+            } else {
+                lx.error("Syntax error: unrecognized keyword");
+            }
+        }
+        db.packagingOption(po);
+        return true;
+    }
+
+    private boolean tryParseRemoveParent(String selector) {
+        if (lx.isKeyword("removeParent")) {
+            if (lx.lookaheadIsLiteral()) {
+                db.modelTransformation(
+                        TransformOption.ofRemoveParent(lx.next().expectLiteral(), selector));
+            } else {
+                db.modelTransformation(TransformOption.ofRemoveParent(selector));
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private boolean tryParseRemovePlugins(String selector) {
+        if (lx.isKeyword("removePlugin")) {
+            db.modelTransformation(
+                    TransformOption.ofRemovePlugin(lx.next().expectLiteral(), selector));
+            return true;
+        }
+        if (lx.isKeyword("removePlugins")) {
+            lx.next().expectBlockBegin();
+            while (!lx.next().isBlockEnd()) {
+                db.modelTransformation(
+                        TransformOption.ofRemovePlugin(lx.expectLiteral(), selector));
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private boolean tryParseRemoveDependencies(String selector) {
+        if (lx.isKeyword("removeDependency")) {
+            db.modelTransformation(
+                    TransformOption.ofRemoveDependency(lx.next().expectLiteral(), selector));
+            return true;
+        }
+        if (lx.isKeyword("removeDependencies")) {
+            lx.next().expectBlockBegin();
+            while (!lx.next().isBlockEnd()) {
+                db.modelTransformation(
+                        TransformOption.ofRemoveDependency(lx.expectLiteral(), selector));
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private boolean tryParseRemoveSubproject(String selector) {
+        if (lx.isKeyword("removeSubproject")) {
+            db.modelTransformation(
+                    TransformOption.ofRemoveSubproject(lx.next().expectLiteral(), selector));
+            return true;
+        }
+        if (lx.isKeyword("removeSubprojects")) {
+            lx.next().expectBlockBegin();
+            while (!lx.next().isBlockEnd()) {
+                db.modelTransformation(
+                        TransformOption.ofRemoveSubproject(lx.expectLiteral(), selector));
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private boolean tryParseAddDependencies(String selector) {
+        if (lx.isKeyword("addDependency")) {
+            db.modelTransformation(
+                    TransformOption.ofAddDependency(lx.next().expectLiteral(), selector));
+            return true;
+        }
+        if (lx.isKeyword("addDependencies")) {
+            lx.next().expectBlockBegin();
+            while (!lx.next().isBlockEnd()) {
+                db.modelTransformation(
+                        TransformOption.ofAddDependency(lx.expectLiteral(), selector));
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private boolean tryParseTransformOptions() {
+        if (lx.isKeyword("transform")) {
+            String selector = lx.next().expectLiteral();
+            lx.next().expectBlockBegin();
+            while (!lx.next().isBlockEnd()) {
+                if (tryParseRemoveParent(selector)
+                        || tryParseRemovePlugins(selector)
+                        || tryParseRemoveDependencies(selector)
+                        || tryParseRemoveSubproject(selector)
+                        || tryParseAddDependencies(selector)) {
+                } else {
+                    lx.error("Syntax error: unrecognized keyword");
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public DeclarativeBuild parse() {
+        while (!lx.next().isEndOfInput()) {
+            if (!lx.isKeyword()) {
+                lx.error("Syntax error: a keyword was expected");
+            }
+            if (tryParseFlag()
+                    || tryParseMavenOptions()
+                    || tryParseTestExcludes()
+                    || tryParseBuildRequires()
+                    || tryParsePackagingOptions()
+                    || tryParseTransformOptions()) {
+            } else {
+                lx.error("Syntax error: unrecognized keyword");
+            }
+        }
+        return db.build();
     }
 }

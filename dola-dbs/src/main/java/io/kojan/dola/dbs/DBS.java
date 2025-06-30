@@ -18,7 +18,6 @@ package io.kojan.dola.dbs;
 import static io.kojan.dola.rpm.RPM.rpmExpand;
 
 import io.kojan.dola.build.DeclarativeBuild;
-import io.kojan.dola.build.DeclarativeBuildBuilder;
 import io.kojan.dola.build.parser.BuildOptionParser;
 import io.kojan.dola.imperator.Imperator;
 import java.util.stream.Collectors;
@@ -40,14 +39,13 @@ public class DBS {
 
     public static String conf() throws Exception {
         String rpmName = rpmExpand("%{name}");
-        DeclarativeBuildBuilder ctxBuilder = new DeclarativeBuildBuilder(rpmName);
+        StringBuilder dslBuilder = new StringBuilder();
         int n = Integer.parseInt(rpmExpand("%#"));
         for (int i = 2; i <= n; i++) {
-            String x = rpmExpand("%" + i);
-            BuildOptionParser parser = new BuildOptionParser(x, ctxBuilder);
-            parser.parse();
+            dslBuilder.append(rpmExpand("%" + i)).append('\n');
         }
-        DeclarativeBuild ctx = ctxBuilder.build();
+        BuildOptionParser parser = new BuildOptionParser(rpmName, dslBuilder.toString());
+        DeclarativeBuild ctx = parser.parse();
 
         boolean withBootstrap = !rpmExpand("%{with bootstrap}").equals("0");
 
