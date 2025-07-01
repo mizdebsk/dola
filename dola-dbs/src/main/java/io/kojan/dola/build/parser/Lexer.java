@@ -70,7 +70,7 @@ class Lexer {
             snipMaxLen = Math.max(snipMaxLen, lineStart[i] - lineStart[i - 1]);
         }
         int snipBeg = lineStart[lineNum];
-        int lastLineLen = canonStr.length() - (lexEnd - lexBeg) - curLineBeg;
+        int errLoc = canonStr.length() - (lexEnd - lexBeg) - curLineBeg;
 
         String banner = "~".repeat(Math.min(72, Math.max(10, snipMaxLen - 1)));
         StringBuilder sb = new StringBuilder();
@@ -86,12 +86,12 @@ class Lexer {
                 .append("\n")
                 .append(banner)
                 .append("\n");
-        if (lastLineLen >= 10) {
+        if (errLoc >= 10) {
             sb.append("  here ");
-            sb.append("-".repeat(lastLineLen - 7));
+            sb.append("-".repeat(errLoc - 7));
             sb.append("^");
         } else {
-            sb.append(" ".repeat(lastLineLen));
+            sb.append(" ".repeat(errLoc));
             sb.append("^--- here");
         }
         throw new BuildOptionParseException(sb.toString());
