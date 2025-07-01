@@ -630,7 +630,7 @@ class BuildOptionParserTest {
                 """;
         String expectedErrorMessage =
                 """
-                    Syntax error: expected keyword related to artifact packaging, or closing brace ending artifact block
+                    Syntax error: expected keyword related to artifact packaging, or closing brace
                     at BuildOption: artifact "some:thing" ->
                     ~~~~~~~~~~~~~~~~~~~~~~~
                     artifact "some:thing" {
@@ -653,7 +653,7 @@ class BuildOptionParserTest {
                 """;
         String expectedErrorMessage =
                 """
-                    Syntax error: expected transformation keyword, or closing brace ending transform block
+                    Syntax error: expected transformation keyword, or closing brace
                     at BuildOption: transform "some:thing" ->
                     ~~~~~~~~~~~~~~~~~~~~~~~~
                     transform "some:thing" {
@@ -739,7 +739,7 @@ class BuildOptionParserTest {
         String code = "artifact \"some:thing\" { package \"foo\"";
         String expectedErrorMessage =
                 """
-                    Syntax error: expected keyword related to artifact packaging, or closing brace ending artifact block
+                    Syntax error: expected keyword related to artifact packaging, or closing brace
                     at BuildOption: artifact "some:thing" -> [...]
                     ~~~~~~~~~~~~~~~~~~~~~~~
                     artifact "some:thing" {
@@ -805,7 +805,7 @@ class BuildOptionParserTest {
                 """;
         String expectedErrorMessage =
                 """
-                    Syntax error: expected keyword related to artifact packaging, or closing brace ending artifact block
+                    Syntax error: expected keyword related to artifact packaging, or closing brace
                     at BuildOption: artifact "com.foo:bar" ->
                     ~~~~~~~~~~~~~~~~~~~~~~~~
                     artifact "com.foo:bar" {
@@ -1056,7 +1056,7 @@ class BuildOptionParserTest {
                 """;
         String expectedErrorMessage =
                 """
-                    Syntax error: expected transformation keyword, or closing brace ending transform block
+                    Syntax error: expected transformation keyword, or closing brace
                     at BuildOption: transform "foo:bar" ->
                     ~~~~~~~~~~~~~~~~~~~~~
                     transform "foo:bar" {
@@ -1118,7 +1118,7 @@ class BuildOptionParserTest {
                 """;
         String expectedErrorMessage =
                 """
-                    Syntax error: expected keyword related to artifact packaging, or closing brace ending artifact block
+                    Syntax error: expected keyword related to artifact packaging, or closing brace
                     at BuildOption: artifact "foo:bar" ->
                     ~~~~~~~~~~~~~~~~~~~~
                     artifact "foo:bar" {
@@ -1139,7 +1139,7 @@ class BuildOptionParserTest {
                 """;
         String expectedErrorMessage =
                 """
-                    Syntax error: expected keyword related to artifact packaging, or closing brace ending artifact block
+                    Syntax error: expected keyword related to artifact packaging, or closing brace
                     at BuildOption: artifact "foo:bar" ->
                     ~~~~~~~~~~~~~~~~~~~~
                     artifact "foo:bar" {
@@ -1160,7 +1160,7 @@ class BuildOptionParserTest {
                 """;
         String expectedErrorMessage =
                 """
-                    Syntax error: expected keyword related to artifact packaging, or closing brace ending artifact block
+                    Syntax error: expected keyword related to artifact packaging, or closing brace
                     at BuildOption: artifact "foo:bar" -> [...]
                     ~~~~~~~~~~~~~~~~~~~~
                     artifact "foo:bar" {
@@ -1182,7 +1182,7 @@ class BuildOptionParserTest {
                 """;
         String expectedErrorMessage =
                 """
-                    Syntax error: expected transformation keyword, or closing brace ending transform block
+                    Syntax error: expected transformation keyword, or closing brace
                     at BuildOption: transform "foo:bar" ->
                     ~~~~~~~~~~~~~~~~~~~~~
                     transform "foo:bar" {
@@ -1203,7 +1203,7 @@ class BuildOptionParserTest {
                 """;
         String expectedErrorMessage =
                 """
-                    Syntax error: expected transformation keyword, or closing brace ending transform block
+                    Syntax error: expected transformation keyword, or closing brace
                     at BuildOption: transform "foo:bar" ->
                     ~~~~~~~~~~~~~~~~~~~~~
                     transform "foo:bar" {
@@ -1224,7 +1224,7 @@ class BuildOptionParserTest {
                 """;
         String expectedErrorMessage =
                 """
-                    Syntax error: expected transformation keyword, or closing brace ending transform block
+                    Syntax error: expected transformation keyword, or closing brace
                     at BuildOption: transform "foo:bar" ->
                     ~~~~~~~~~~~~~~~~~~~
                     transform "foo:bar"
@@ -1266,7 +1266,7 @@ class BuildOptionParserTest {
                 """;
         String expectedErrorMessage =
                 """
-                    Syntax error: expected keyword related to artifact packaging, or closing brace ending artifact block
+                    Syntax error: expected keyword related to artifact packaging, or closing brace
                     at BuildOption: artifact "foo:bar" ->
                     ~~~~~~~~~~~~~~~~~~~~
                     artifact "foo:bar" {

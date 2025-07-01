@@ -162,7 +162,7 @@ public class BuildOptionParser {
                 }
             } else {
                 lx.error(
-                        "Syntax error: expected keyword related to artifact packaging, or closing brace ending artifact block");
+                        "Syntax error: expected keyword related to artifact packaging, or closing brace");
             }
         }
         db.packagingOption(po);
@@ -261,8 +261,7 @@ public class BuildOptionParser {
                         || tryParseRemoveSubproject(selector)
                         || tryParseAddDependencies(selector)) {
                 } else {
-                    lx.error(
-                            "Syntax error: expected transformation keyword, or closing brace ending transform block");
+                    lx.error("Syntax error: expected transformation keyword, or closing brace");
                 }
             }
             return true;
