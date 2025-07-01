@@ -17,20 +17,23 @@ package io.kojan.dola.build.parser;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.stream.Collectors;
 
 class Lexer {
-    final String str;
-    final int eoi;
-    int lexBeg;
-    int lexEnd;
-    int pos;
+    // For parsing
+    final String str; // raw input string with sentinel character appended
+    final int eoi; // end of input index (points to sentinel)
+    int lexBeg; // begin index (inclusive) of current token
+    int lexEnd; // end index (exclusive) of current token
+    int pos; // begin index of next token
 
+    // For making canonical form on the fly
+    private final StringBuilder canonicalForm = new StringBuilder();
+    private String currentToken; // last token that has not yet been added to cannonicalForm
     private int indentLevel;
-    private boolean whiteSpaceBefore;
-    private boolean newLineBefore;
-    private final StringBuilder buffer = new StringBuilder();
-    private String currentToken;
+    private boolean whiteSpaceBefore; // white space is expected before current token
+    private boolean newLineBefore; // new line is expected before current token
+
+    // For error reporting
     private Deque<String> path = new ArrayDeque<>();
     private Deque<Integer> pathForks = new ArrayDeque<>();
 
@@ -51,52 +54,63 @@ class Lexer {
 
     public BuildOptionParseException error(String msg) throws BuildOptionParseException {
 
-        token();
-        String canonStr = buffer.toString();
+        // Use canonical (formatted) string for error reporting.
+        appendTokenToCanonicalForm();
+        String canonStr = canonicalForm.toString();
 
+        // Figure out where (at which indexes) the last 5 lines of code start.
         int[] lineStart = new int[nLinesInContext];
         int lineNum = 0;
         int curLineBeg = 0;
-        for (int i = 0; i < canonStr.length(); i++) {
-            if (canonStr.charAt(i) == '\n') {
-                curLineBeg = i + 1;
-                lineStart[lineNum] = i + 1;
+        for (int i = 0; i < canonStr.length(); ) {
+            if (canonStr.charAt(i++) == '\n') {
+                curLineBeg = i;
+                lineStart[lineNum] = i;
                 lineNum = (lineNum + 1) % nLinesInContext;
             }
         }
+        int snipBeg = lineStart[lineNum];
 
+        // Figure out width of the snippet (max line length in the snippet)
         int snipMaxLen = lineStart[0] - lineStart[nLinesInContext - 1];
         for (int i = 1; i < nLinesInContext; i++) {
             snipMaxLen = Math.max(snipMaxLen, lineStart[i] - lineStart[i - 1]);
         }
-        int snipBeg = lineStart[lineNum];
-        int errLoc = canonStr.length() - (lexEnd - lexBeg) - curLineBeg;
-
         String banner = "~".repeat(Math.min(72, Math.max(10, snipMaxLen - 1)));
+
+        int lexLen = lexEnd - lexBeg;
+        int errLoc = canonStr.length() - lexLen - curLineBeg;
+
+        // First, message describing nature of the error.
         StringBuilder sb = new StringBuilder();
-        sb.append(msg)
-                .append("\n")
-                .append("at BuildOption:")
-                .append(path.stream().map(x -> " " + x).collect(Collectors.joining()))
-                .append("\n")
-                .append(banner)
-                .append("\n")
-                .append(snipBeg > 0 ? "[...]\n" : "")
-                .append(canonStr.substring(snipBeg))
-                .append("\n")
-                .append(banner)
-                .append("\n");
-        if (errLoc >= 10) {
-            sb.append("  here ");
-            sb.append("-".repeat(errLoc - 7));
-            sb.append("^");
-        } else {
-            sb.append(" ".repeat(errLoc));
-            sb.append("^--- here");
+        sb.append(msg).append("\n");
+
+        // Then path from AST root to the error location.
+        sb.append("at BuildOption:");
+        for (String node : path) {
+            sb.append(" ").append(node);
         }
+        sb.append("\n");
+
+        // Next code snippet.
+        sb.append(banner).append("\n");
+        if (snipBeg > 0) {
+            sb.append("[...]\n");
+        }
+        sb.append(canonStr.substring(snipBeg)).append("\n");
+        sb.append(banner).append("\n");
+
+        // Finally, arrow pointing to the error location in the snippet.
+        if (errLoc >= 10) {
+            sb.append("  here ").append("-".repeat(errLoc - 7)).append("^");
+        } else {
+            sb.append(" ".repeat(errLoc)).append("^--- here");
+        }
+
         throw new BuildOptionParseException(sb.toString());
     }
 
+    // Advance to the next lookahead token
     private void lookahead() {
         int ch;
         while ((ch = str.charAt(pos)) == ' ' || ch == '\n') {
@@ -104,13 +118,13 @@ class Lexer {
         }
     }
 
-    private void token() {
+    private void appendTokenToCanonicalForm() {
         if (currentToken != null) {
             boolean newLineAfter;
-            if (currentToken.equals("{")) {
+            if (currentToken.charAt(0) == '{') {
                 indentLevel++;
                 newLineAfter = true;
-            } else if (currentToken.equals("}")) {
+            } else if (currentToken.charAt(0) == '}') {
                 indentLevel--;
                 newLineBefore = true;
                 newLineAfter = true;
@@ -119,21 +133,18 @@ class Lexer {
             }
             if (whiteSpaceBefore) {
                 if (newLineBefore) {
-                    buffer.append('\n').append("    ".repeat(Math.max(indentLevel, 0)));
+                    canonicalForm.append('\n').append("    ".repeat(Math.max(indentLevel, 0)));
                 } else {
-                    buffer.append(' ');
+                    canonicalForm.append(' ');
                 }
             }
-            buffer.append(currentToken);
+            canonicalForm.append(currentToken);
             newLineBefore = newLineAfter;
             whiteSpaceBefore = true;
         }
     }
 
-    private void pathAppend(String tok) {
-        path.addLast(tok);
-    }
-
+    // Discard current token, advance to next token.
     public Lexer next() throws BuildOptionParseException {
         lexBeg = pos;
         if (pos == eoi) {
@@ -155,26 +166,27 @@ class Lexer {
             error("Lexical error: illegal character");
         }
         lexEnd = pos;
-        token();
+        appendTokenToCanonicalForm();
         currentToken = str.substring(lexBeg, lexEnd);
         lookahead();
         return this;
     }
 
+    // Is current token a specific keyword?
     public boolean isKeyword(String kw) {
-        boolean isKw =
-                kw.length() == lexEnd - lexBeg && str.regionMatches(lexBeg, kw, 0, lexEnd - lexBeg);
-        if (isKw) {
-            pathAppend(currentToken);
+        if (kw.length() == lexEnd - lexBeg && str.regionMatches(lexBeg, kw, 0, lexEnd - lexBeg)) {
+            path.addLast(currentToken);
+            return true;
         }
-        return isKw;
+        return false;
     }
 
+    // Only literal string is allowed at this location, return its value.
     public String expectLiteral() throws BuildOptionParseException {
         if (str.charAt(lexBeg) != '"') {
             error("Syntax error: expected literal (quoted string)");
         }
-        pathAppend(currentToken);
+        path.addLast(currentToken);
         return str.substring(lexBeg + 1, lexEnd - 1);
     }
 
@@ -182,11 +194,12 @@ class Lexer {
         pathForks.addLast(path.size());
     }
 
+    // Only block beginning is allowed at this location.
     public void expectBlockBegin() throws BuildOptionParseException {
         if (str.charAt(lexBeg) != '{') {
             error("Syntax error: expected opening brace '{'");
         }
-        pathAppend("->");
+        path.addLast("->");
         markPathFork();
     }
 
@@ -206,21 +219,25 @@ class Lexer {
         return reset;
     }
 
+    // Is current token a block end '}'?
     public boolean isBlockEnd() {
         newLineBefore = true;
         return pathUnwind(str.charAt(lexBeg) == '}');
     }
 
+    // Is end of input reached, meaning that all tokens were exhausted?
     public boolean isEndOfInput() {
         newLineBefore = true;
         return pathUnwind(lexBeg == eoi);
     }
 
+    // Is the *next* token (aka lookahead token) a string literal?
     public boolean lookaheadIsLiteral() {
         return str.charAt(pos) == '"';
     }
 
+    // Return parsed code as formatted string, in canonical form.
     public String asString() {
-        return buffer.toString();
+        return canonicalForm.toString();
     }
 }
