@@ -15,19 +15,10 @@
  */
 package io.kojan.dola.build.parser;
 
-import io.kojan.dola.build.DeclarativeBuildBuilder;
+public class BuildOptionParseException extends Exception {
+    private static final long serialVersionUID = 1;
 
-public class BuildOptionFormater {
-    private final FormattingLexer lexer;
-    private final BuildOptionParser parser;
-
-    public BuildOptionFormater(String str) {
-        lexer = new FormattingLexer(str);
-        parser = new BuildOptionParser(lexer, new DeclarativeBuildBuilder("dummy"));
-    }
-
-    public String format() {
-        parser.parse();
-        return lexer.asString();
+    public BuildOptionParseException(String message) {
+        super(message);
     }
 }
