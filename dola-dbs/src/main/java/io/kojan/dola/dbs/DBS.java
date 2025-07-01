@@ -18,6 +18,7 @@ package io.kojan.dola.dbs;
 import static io.kojan.dola.rpm.RPM.rpmExpand;
 
 import io.kojan.dola.build.DeclarativeBuild;
+import io.kojan.dola.build.parser.BuildOptionParseException;
 import io.kojan.dola.build.parser.BuildOptionParser;
 import io.kojan.dola.imperator.Imperator;
 import java.util.stream.Collectors;
@@ -45,11 +46,22 @@ public class DBS {
             dslBuilder.append(rpmExpand("%" + i)).append('\n');
         }
         BuildOptionParser parser = new BuildOptionParser(rpmName, dslBuilder.toString());
-        DeclarativeBuild ctx = parser.parse();
+        DeclarativeBuild db;
+        try {
+            db = parser.parse();
+        } catch (BuildOptionParseException e) {
+            System.err.println("error: Unable to parse BuildOption");
+            System.err.println(e.getMessage());
+            System.err.println("Dola was unable to parse specified BuildOption.");
+            System.err.println("The build cannot continue.");
+            System.err.println("Please fix BuildOption syntax.");
+            System.exit(66);
+            throw e;
+        }
 
         boolean withBootstrap = !rpmExpand("%{with bootstrap}").equals("0");
 
-        imperator = new Imperator(ctx, withBootstrap);
+        imperator = new Imperator(db, withBootstrap);
 
         return "";
     }

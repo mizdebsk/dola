@@ -26,13 +26,9 @@ public class BuildOptionParser {
     private final Lexer lx;
     private final DeclarativeBuildBuilder db;
 
-    BuildOptionParser(Lexer lx, DeclarativeBuildBuilder db) {
-        this.lx = lx;
-        this.db = db;
-    }
-
-    public BuildOptionParser(String rpmName, String str) {
-        this(new Lexer(str), new DeclarativeBuildBuilder(rpmName));
+    public BuildOptionParser(String rpmName, String str) throws BuildOptionParseException {
+        this.lx = new Lexer(str);
+        this.db = new DeclarativeBuildBuilder(rpmName);
     }
 
     private boolean tryParseFlag() {
@@ -51,7 +47,7 @@ public class BuildOptionParser {
         return false;
     }
 
-    private boolean tryParseMavenOptions() {
+    private boolean tryParseMavenOptions() throws BuildOptionParseException {
         if (lx.isKeyword("mavenOption")) {
             db.mavenOption(lx.next().expectLiteral());
             return true;
@@ -66,7 +62,7 @@ public class BuildOptionParser {
         return false;
     }
 
-    private boolean tryParseTestExcludes() {
+    private boolean tryParseTestExcludes() throws BuildOptionParseException {
         if (lx.isKeyword("testExclude")) {
             db.testExclude(lx.next().expectLiteral());
             return true;
@@ -81,7 +77,7 @@ public class BuildOptionParser {
         return false;
     }
 
-    private boolean tryParseBuildRequires() {
+    private boolean tryParseBuildRequires() throws BuildOptionParseException {
         if (lx.isKeyword("buildRequire")) {
             db.extraBuildReq(Artifact.of(lx.next().expectLiteral()));
             return true;
@@ -104,7 +100,8 @@ public class BuildOptionParser {
         return false;
     }
 
-    private PackagingOption parseArtifactSelectorLiteral(String globLiteral) {
+    private PackagingOption parseArtifactSelectorLiteral(String globLiteral)
+            throws BuildOptionParseException {
         if (globLiteral.indexOf(':') < 0) {
             lx.error("Syntax error: artifact glob must contain a colon");
         }
@@ -112,7 +109,7 @@ public class BuildOptionParser {
         return PackagingOption.of(globArray[0], globArray[1]);
     }
 
-    private Alias parseAliasLiteral(String aliasLiteral) {
+    private Alias parseAliasLiteral(String aliasLiteral) throws BuildOptionParseException {
         if (aliasLiteral.indexOf(':') < 0) {
             lx.error("Syntax error: alias specifier must contain a colon");
         }
@@ -120,7 +117,7 @@ public class BuildOptionParser {
         return Alias.of(aliasArray[0], aliasArray[1]);
     }
 
-    private boolean tryParsePackagingOptions() {
+    private boolean tryParsePackagingOptions() throws BuildOptionParseException {
         if (!lx.isKeyword("artifact")) {
             return false;
         }
@@ -164,14 +161,15 @@ public class BuildOptionParser {
                     po = po.withAlias(parseAliasLiteral(lx.expectLiteral()));
                 }
             } else {
-                lx.error("Syntax error: unrecognized keyword");
+                lx.error(
+                        "Syntax error: expected keyword related to artifact packaging, or closing brace ending artifact block");
             }
         }
         db.packagingOption(po);
         return true;
     }
 
-    private boolean tryParseRemoveParent(String selector) {
+    private boolean tryParseRemoveParent(String selector) throws BuildOptionParseException {
         if (lx.isKeyword("removeParent")) {
             if (lx.lookaheadIsLiteral()) {
                 db.modelTransformation(
@@ -184,7 +182,7 @@ public class BuildOptionParser {
         return false;
     }
 
-    private boolean tryParseRemovePlugins(String selector) {
+    private boolean tryParseRemovePlugins(String selector) throws BuildOptionParseException {
         if (lx.isKeyword("removePlugin")) {
             db.modelTransformation(
                     TransformOption.ofRemovePlugin(lx.next().expectLiteral(), selector));
@@ -201,7 +199,7 @@ public class BuildOptionParser {
         return false;
     }
 
-    private boolean tryParseRemoveDependencies(String selector) {
+    private boolean tryParseRemoveDependencies(String selector) throws BuildOptionParseException {
         if (lx.isKeyword("removeDependency")) {
             db.modelTransformation(
                     TransformOption.ofRemoveDependency(lx.next().expectLiteral(), selector));
@@ -218,7 +216,7 @@ public class BuildOptionParser {
         return false;
     }
 
-    private boolean tryParseRemoveSubproject(String selector) {
+    private boolean tryParseRemoveSubproject(String selector) throws BuildOptionParseException {
         if (lx.isKeyword("removeSubproject")) {
             db.modelTransformation(
                     TransformOption.ofRemoveSubproject(lx.next().expectLiteral(), selector));
@@ -235,7 +233,7 @@ public class BuildOptionParser {
         return false;
     }
 
-    private boolean tryParseAddDependencies(String selector) {
+    private boolean tryParseAddDependencies(String selector) throws BuildOptionParseException {
         if (lx.isKeyword("addDependency")) {
             db.modelTransformation(
                     TransformOption.ofAddDependency(lx.next().expectLiteral(), selector));
@@ -252,7 +250,7 @@ public class BuildOptionParser {
         return false;
     }
 
-    private boolean tryParseTransformOptions() {
+    private boolean tryParseTransformOptions() throws BuildOptionParseException {
         if (lx.isKeyword("transform")) {
             String selector = lx.next().expectLiteral();
             lx.next().expectBlockBegin();
@@ -263,7 +261,8 @@ public class BuildOptionParser {
                         || tryParseRemoveSubproject(selector)
                         || tryParseAddDependencies(selector)) {
                 } else {
-                    lx.error("Syntax error: unrecognized keyword");
+                    lx.error(
+                            "Syntax error: expected transformation keyword, or closing brace ending transform block");
                 }
             }
             return true;
@@ -271,11 +270,8 @@ public class BuildOptionParser {
         return false;
     }
 
-    public DeclarativeBuild parse() {
+    public DeclarativeBuild parse() throws BuildOptionParseException {
         while (!lx.next().isEndOfInput()) {
-            if (!lx.isKeyword()) {
-                lx.error("Syntax error: a keyword was expected");
-            }
             if (tryParseFlag()
                     || tryParseMavenOptions()
                     || tryParseTestExcludes()
@@ -283,9 +279,13 @@ public class BuildOptionParser {
                     || tryParsePackagingOptions()
                     || tryParseTransformOptions()) {
             } else {
-                lx.error("Syntax error: unrecognized keyword");
+                lx.error("Syntax error: expected global keyword, or end of build options");
             }
         }
         return db.build();
+    }
+
+    public String format() {
+        return lx.asString();
     }
 }

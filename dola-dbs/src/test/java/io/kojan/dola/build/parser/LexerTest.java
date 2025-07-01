@@ -23,48 +23,47 @@ import org.junit.jupiter.api.Test;
 class LexerTest {
 
     @Test
-    void empty() {
+    void empty() throws Exception {
         Lexer lexer = new Lexer("");
         assertThat(lexer.next().isEndOfInput()).isTrue();
     }
 
     @Test
-    void whitespaceOnly() {
+    void whitespaceOnly() throws Exception {
         Lexer lexer = new Lexer(" \n");
         assertThat(lexer.next().isEndOfInput()).isTrue();
     }
 
     @Test
-    void keywordToken() {
+    void keywordToken() throws Exception {
         Lexer lexer = new Lexer("print");
-        assertThat(lexer.next().isKeyword()).isTrue();
-        assertThat(lexer.isKeyword("print")).isTrue();
+        assertThat(lexer.next().isKeyword("print")).isTrue();
         assertThat(lexer.next().isEndOfInput()).isTrue();
     }
 
     @Test
-    void literalToken() {
+    void literalToken() throws Exception {
         Lexer lexer = new Lexer("\"hello\"");
         assertThat(lexer.next().expectLiteral()).isEqualTo("hello");
         assertThat(lexer.next().isEndOfInput()).isTrue();
     }
 
     @Test
-    void beginToken() {
+    void beginToken() throws Exception {
         Lexer lexer = new Lexer("{");
         lexer.next().expectBlockBegin();
         assertThat(lexer.next().isEndOfInput()).isTrue();
     }
 
     @Test
-    void endToken() {
+    void endToken() throws Exception {
         Lexer lexer = new Lexer("}");
         assertThat(lexer.next().isBlockEnd()).isTrue();
         assertThat(lexer.next().isEndOfInput()).isTrue();
     }
 
     @Test
-    void multipleTokens() {
+    void multipleTokens() throws Exception {
         Lexer lexer = new Lexer("print \"value\" { }");
         assertThat(lexer.next().isKeyword("print")).isTrue();
         assertThat(lexer.next().expectLiteral()).isEqualTo("value");
@@ -74,7 +73,7 @@ class LexerTest {
     }
 
     @Test
-    void whitespaceNormalization() {
+    void whitespaceNormalization() throws Exception {
         Lexer lexer = new Lexer("  print\n \"hello\"  ");
         assertThat(lexer.next().isKeyword("print")).isTrue();
         assertThat(lexer.next().expectLiteral()).isEqualTo("hello");
@@ -82,33 +81,33 @@ class LexerTest {
     }
 
     @Test
-    void tabRejection() {
-        assertThatExceptionOfType(RuntimeException.class)
+    void tabRejection() throws Exception {
+        assertThatExceptionOfType(BuildOptionParseException.class)
                 .isThrownBy(() -> new Lexer("  print\n\t\"hello\"  "))
                 .withMessageContaining("TAB characters are not allowed");
     }
 
     @Test
-    void unterminatedStringLiteral() {
+    void unterminatedStringLiteral() throws Exception {
         Lexer lexer = new Lexer("\"unterminated");
-        assertThatExceptionOfType(RuntimeException.class)
+        assertThatExceptionOfType(BuildOptionParseException.class)
                 .isThrownBy(lexer::next)
                 .withMessageContaining("unterminated string literal");
     }
 
     @Test
-    void illegalCharacter() {
+    void illegalCharacter() throws Exception {
         Lexer lexer = new Lexer("$");
-        assertThatExceptionOfType(RuntimeException.class)
+        assertThatExceptionOfType(BuildOptionParseException.class)
                 .isThrownBy(lexer::next)
                 .withMessageContaining("illegal character");
     }
 
     @Test
-    void expectLiteralFailure() {
+    void expectLiteralFailure() throws Exception {
         Lexer lexer = new Lexer("print");
         lexer.next();
-        assertThatExceptionOfType(RuntimeException.class)
+        assertThatExceptionOfType(BuildOptionParseException.class)
                 .isThrownBy(lexer::expectLiteral)
                 .withMessageContaining("expected literal");
     }

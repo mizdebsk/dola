@@ -25,56 +25,52 @@ import org.junit.jupiter.api.Test;
 
 class BuildOptionParserTest {
 
-    DeclarativeBuild parse(String s) {
+    DeclarativeBuild parse(String s) throws Exception {
         return new BuildOptionParser("mypkg", s.replace('\n', ' ')).parse();
     }
 
-    DeclarativeBuild parsed(String s) {
+    DeclarativeBuild parsed(String s) throws Exception {
         DeclarativeBuild db = parse(s);
         assertThat(db).isNotNull();
         return db;
     }
 
+    String unindent(String s) {
+        return (s + "    ").stripIndent().strip();
+    }
+
     @Test
-    void empty() {
+    void empty() throws Exception {
         parsed("");
     }
 
     @Test
-    void whitespaceOnly() {
+    void whitespaceOnly() throws Exception {
         parsed("  ");
     }
 
     @Test
-    void lexicalError() {
-        assertThatExceptionOfType(RuntimeException.class)
-                .isThrownBy(() -> parse("skipTests%bar"))
-                .withMessageContaining("Lexical error");
+    void keywordTypo() throws Exception {
+        String code =
+                """
+                    skipTestsss
+                """;
+        String expectedErrorMessage =
+                """
+                    Syntax error: expected global keyword, or end of build options
+                    at BuildOption:
+                    ~~~~~~~~~~
+                    skipTestsss
+                    ~~~~~~~~~~
+                    ^--- here
+                """;
+        assertThatExceptionOfType(BuildOptionParseException.class)
+                .isThrownBy(() -> parse(code))
+                .withMessage(unindent(expectedErrorMessage));
     }
 
     @Test
-    void capitalKeyword() {
-        assertThatExceptionOfType(RuntimeException.class)
-                .isThrownBy(() -> parse("SkipTests"))
-                .withMessageContaining("Lexical error");
-    }
-
-    @Test
-    void alphanumericKeyword() {
-        assertThatExceptionOfType(RuntimeException.class)
-                .isThrownBy(() -> parse("skipTests2"))
-                .withMessageContaining("Lexical error");
-    }
-
-    @Test
-    void keywordTypo() {
-        assertThatExceptionOfType(RuntimeException.class)
-                .isThrownBy(() -> parse("skipTestsss"))
-                .withMessageContaining("unrecognized keyword");
-    }
-
-    @Test
-    void transformBlockEmpty() {
+    void transformBlockEmpty() throws Exception {
         String code =
                 """
                     transform "foo:bar" {
@@ -84,7 +80,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void skipTests() {
+    void skipTests() throws Exception {
         String code =
                 """
                     skipTests
@@ -94,7 +90,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void singletonPackaging() {
+    void singletonPackaging() throws Exception {
         String code =
                 """
                     singletonPackaging
@@ -104,7 +100,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void usesJavapackagesBootstrap() {
+    void usesJavapackagesBootstrap() throws Exception {
         String code =
                 """
                     usesJavapackagesBootstrap
@@ -114,7 +110,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void mavenOption() {
+    void mavenOption() throws Exception {
         String code =
                 """
                     mavenOption "-Prun-its"
@@ -124,7 +120,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void mavenOptions() {
+    void mavenOptions() throws Exception {
         String code =
                 """
                     mavenOptions {
@@ -137,7 +133,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void buildRequire() {
+    void buildRequire() throws Exception {
         String code =
                 """
                     buildRequire "foo:bar"
@@ -148,7 +144,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void buildRequireFilter() {
+    void buildRequireFilter() throws Exception {
         String code =
                 """
                     buildRequireFilter "foo:bar"
@@ -159,7 +155,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void buildRequiresOne() {
+    void buildRequiresOne() throws Exception {
         String code =
                 """
                     buildRequires {
@@ -172,7 +168,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void buildRequiresTwo() {
+    void buildRequiresTwo() throws Exception {
         String code =
                 """
                     buildRequires {
@@ -188,7 +184,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void buildRequiresFilter() {
+    void buildRequiresFilter() throws Exception {
         String code =
                 """
                     buildRequires {
@@ -202,7 +198,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void testExclude() {
+    void testExclude() throws Exception {
         String code =
                 """
                     testExclude "BadTest"
@@ -212,7 +208,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void testExcludesOne() {
+    void testExcludesOne() throws Exception {
         String code =
                 """
                     testExcludes {
@@ -224,7 +220,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void testExcludesThree() {
+    void testExcludesThree() throws Exception {
         String code =
                 """
                     testExcludes {
@@ -238,7 +234,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void artifactEmpty() {
+    void artifactEmpty() throws Exception {
         String code =
                 """
                     artifact "some:thing" {}
@@ -250,7 +246,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void artifactPackage() {
+    void artifactPackage() throws Exception {
         String code =
                 """
                     artifact "some:thing" {
@@ -263,7 +259,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void artifactNoInstall() {
+    void artifactNoInstall() throws Exception {
         String code =
                 """
                     artifact "some:thing" {noInstall}
@@ -274,7 +270,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void artifactRepository() {
+    void artifactRepository() throws Exception {
         String code =
                 """
                     artifact "some:thing" {
@@ -287,7 +283,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void artifactFile() {
+    void artifactFile() throws Exception {
         String code =
                 """
                     artifact "some:thing" {
@@ -300,7 +296,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void artifactFilesOne() {
+    void artifactFilesOne() throws Exception {
         String code =
                 """
                     artifact "some:thing" {
@@ -313,7 +309,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void artifactFilesThree() {
+    void artifactFilesThree() throws Exception {
         String code =
                 """
                     artifact "some:thing" {
@@ -329,7 +325,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void artifactCompatVersion() {
+    void artifactCompatVersion() throws Exception {
         String code =
                 """
                     artifact "some:thing" {
@@ -343,7 +339,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void artifactCompatVersionsOne() {
+    void artifactCompatVersionsOne() throws Exception {
         String code =
                 """
                     artifact "some:thing" {
@@ -357,7 +353,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void artifactCompatVersionsThree() {
+    void artifactCompatVersionsThree() throws Exception {
         String code =
                 """
                     artifact "some:thing" {
@@ -375,7 +371,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void artifactAlias() {
+    void artifactAlias() throws Exception {
         String code =
                 """
                     artifact "some:thing" {
@@ -389,7 +385,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void artifactAliasesOne() {
+    void artifactAliasesOne() throws Exception {
         String code =
                 """
                     artifact "some:thing" {
@@ -404,7 +400,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void artifactAliasesThree() {
+    void artifactAliasesThree() throws Exception {
         String code =
                 """
                     artifact "some:thing" {
@@ -425,7 +421,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void transformEmpty() {
+    void transformEmpty() throws Exception {
         String code =
                 """
                     transform "some:thing" {}
@@ -435,7 +431,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void transformRemoveParentLone() {
+    void transformRemoveParentLone() throws Exception {
         String code =
                 """
                     transform "some:thing" {
@@ -447,7 +443,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void transformRemoveParentArg() {
+    void transformRemoveParentArg() throws Exception {
         String code =
                 """
                     transform "some:thing" {
@@ -459,7 +455,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void transformRemoveDependency() {
+    void transformRemoveDependency() throws Exception {
         String code =
                 """
                     transform "some:thing" {
@@ -471,7 +467,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void transformRemoveDependenciesOne() {
+    void transformRemoveDependenciesOne() throws Exception {
         String code =
                 """
                     transform "some:thing" {
@@ -483,7 +479,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void transformRemoveDependenciesMultiple() {
+    void transformRemoveDependenciesMultiple() throws Exception {
         String code =
                 """
                     transform "some:thing" {
@@ -499,7 +495,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void transformRemovePlugin() {
+    void transformRemovePlugin() throws Exception {
         String code =
                 """
                     transform "some:thing" {
@@ -511,7 +507,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void transformRemovePluginsOne() {
+    void transformRemovePluginsOne() throws Exception {
         String code =
                 """
                     transform "some:thing" {
@@ -525,7 +521,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void transformRemovePluginsThree() {
+    void transformRemovePluginsThree() throws Exception {
         String code =
                 """
                     transform "some:thing" {
@@ -541,7 +537,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void transformRemoveSubproject() {
+    void transformRemoveSubproject() throws Exception {
         String code =
                 """
                     transform "some:thing" {
@@ -553,7 +549,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void transformRemoveSubprojectsOne() {
+    void transformRemoveSubprojectsOne() throws Exception {
         String code =
                 """
                     transform "some:thing" {
@@ -567,7 +563,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void transformRemoveSubprojectsThree() {
+    void transformRemoveSubprojectsThree() throws Exception {
         String code =
                 """
                     transform "some:thing" {
@@ -583,7 +579,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void transformAddDependency() {
+    void transformAddDependency() throws Exception {
         String code =
                 """
                     transform "some:thing" {
@@ -595,7 +591,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void transformAddDependenciesOne() {
+    void transformAddDependenciesOne() throws Exception {
         String code =
                 """
                     transform "some:thing" {
@@ -609,7 +605,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void transformAddDependenciesThree() {
+    void transformAddDependenciesThree() throws Exception {
         String code =
                 """
                     transform "some:thing" {
@@ -625,38 +621,74 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void artifactBadKeyword() {
+    void artifactBadKeyword() throws Exception {
         String code =
                 """
                     artifact "some:thing" {
                        boom
                     }
                 """;
-        assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> parse(code));
+        String expectedErrorMessage =
+                """
+                    Syntax error: expected keyword related to artifact packaging, or closing brace ending artifact block
+                    at BuildOption: artifact "some:thing" ->
+                    ~~~~~~~~~~~~~~~~~~~~~~~
+                    artifact "some:thing" {
+                        boom
+                    ~~~~~~~~~~~~~~~~~~~~~~~
+                        ^--- here
+                """;
+        assertThatExceptionOfType(BuildOptionParseException.class)
+                .isThrownBy(() -> parse(code))
+                .withMessage(unindent(expectedErrorMessage));
     }
 
     @Test
-    void transformBadKeyword() {
+    void transformBadKeyword() throws Exception {
         String code =
                 """
                     transform "some:thing" {
                         boom
                     }
                 """;
-        assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> parse(code));
+        String expectedErrorMessage =
+                """
+                    Syntax error: expected transformation keyword, or closing brace ending transform block
+                    at BuildOption: transform "some:thing" ->
+                    ~~~~~~~~~~~~~~~~~~~~~~~~
+                    transform "some:thing" {
+                        boom
+                    ~~~~~~~~~~~~~~~~~~~~~~~~
+                        ^--- here
+                """;
+        assertThatExceptionOfType(BuildOptionParseException.class)
+                .isThrownBy(() -> parse(code))
+                .withMessage(unindent(expectedErrorMessage));
     }
 
     @Test
-    void globalBadKeyword() {
+    void globalBadKeyword() throws Exception {
         String code =
                 """
-                    boom
+                    mavenOption "foo" boom
                 """;
-        assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> parse(code));
+        String expectedErrorMessage =
+                """
+                    Syntax error: expected global keyword, or end of build options
+                    at BuildOption: [...]
+                    ~~~~~~~~~~~~~~~~~
+                    mavenOption "foo"
+                    boom
+                    ~~~~~~~~~~~~~~~~~
+                    ^--- here
+                """;
+        assertThatExceptionOfType(BuildOptionParseException.class)
+                .isThrownBy(() -> parse(code))
+                .withMessage(unindent(expectedErrorMessage));
     }
 
     @Test
-    void combined() {
+    void combined() throws Exception {
         String code =
                 """
                     usesJavapackagesBootstrap
@@ -703,23 +735,43 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void unclosedBraceShouldFail() {
+    void unclosedBraceShouldFail() throws Exception {
         String code = "artifact \"some:thing\" { package \"foo\"";
-        assertThatExceptionOfType(RuntimeException.class)
+        String expectedErrorMessage =
+                """
+                    Syntax error: expected keyword related to artifact packaging, or closing brace ending artifact block
+                    at BuildOption: artifact "some:thing" -> [...]
+                    ~~~~~~~~~~~~~~~~~~~~~~~
+                    artifact "some:thing" {
+                        package
+                        "foo"
+                    ~~~~~~~~~~~~~~~~~~~~~~~
+                             ^--- here
+                """;
+        assertThatExceptionOfType(BuildOptionParseException.class)
                 .isThrownBy(() -> parse(code))
-                .withMessageContaining("Syntax error");
+                .withMessage(unindent(expectedErrorMessage));
     }
 
     @Test
-    void unclosedStringLiteralShouldFail() {
+    void unclosedStringLiteralShouldFail() throws Exception {
         String code = "mavenOption \"-X";
-        assertThatExceptionOfType(RuntimeException.class)
+        String expectedErrorMessage =
+                """
+                    Lexical error: unterminated string literal
+                    at BuildOption: mavenOption
+                    ~~~~~~~~~~
+                    mavenOption
+                    ~~~~~~~~~~
+                      here -----^
+                """;
+        assertThatExceptionOfType(BuildOptionParseException.class)
                 .isThrownBy(() -> parse(code))
-                .withMessageContaining("Lexical error");
+                .withMessage(unindent(expectedErrorMessage));
     }
 
     @Test
-    void duplicateKeywordInArtifactShouldFail() {
+    void duplicateKeywordInArtifactShouldFail() throws Exception {
         String code =
                 """
                     artifact "com.foo:bar" {
@@ -727,39 +779,70 @@ class BuildOptionParserTest {
                         package "sub2"
                     }
                 """;
-        assertThatExceptionOfType(RuntimeException.class)
+        String expectedErrorMessage =
+                """
+                    Semantic error: duplicate target package specified
+                    at BuildOption: artifact "com.foo:bar" -> [...] package
+                    ~~~~~~~~~~~~~~~~~~~~~~~~
+                    artifact "com.foo:bar" {
+                        package "sub1"
+                        package
+                    ~~~~~~~~~~~~~~~~~~~~~~~~
+                        ^--- here
+                """;
+        assertThatExceptionOfType(BuildOptionParseException.class)
                 .isThrownBy(() -> parse(code))
-                .withMessageContaining("duplicate target package");
+                .withMessage(unindent(expectedErrorMessage));
     }
 
     @Test
-    void illegalKeywordInBlockShouldFail() {
+    void illegalKeywordInBlockShouldFail() throws Exception {
         String code =
                 """
                     artifact "com.foo:bar" {
                         unexpectedKeyword "value"
                     }
                 """;
-        assertThatExceptionOfType(RuntimeException.class)
+        String expectedErrorMessage =
+                """
+                    Syntax error: expected keyword related to artifact packaging, or closing brace ending artifact block
+                    at BuildOption: artifact "com.foo:bar" ->
+                    ~~~~~~~~~~~~~~~~~~~~~~~~
+                    artifact "com.foo:bar" {
+                        unexpectedKeyword
+                    ~~~~~~~~~~~~~~~~~~~~~~~~
+                        ^--- here
+                """;
+        assertThatExceptionOfType(BuildOptionParseException.class)
                 .isThrownBy(() -> parse(code))
-                .withMessageContaining("Syntax error");
+                .withMessage(unindent(expectedErrorMessage));
     }
 
     @Test
-    void artifactWithInvalidAliasFormatShouldFail() {
+    void artifactWithInvalidAliasFormatShouldFail() throws Exception {
         String code =
                 """
                     artifact "com.foo:bar" {
                         alias "noColon"
                     }
                 """;
-        assertThatExceptionOfType(RuntimeException.class)
+        String expectedErrorMessage =
+                """
+                    Syntax error: alias specifier must contain a colon
+                    at BuildOption: artifact "com.foo:bar" -> alias "noColon"
+                    ~~~~~~~~~~~~~~~~~~~~~~~~
+                    artifact "com.foo:bar" {
+                        alias "noColon"
+                    ~~~~~~~~~~~~~~~~~~~~~~~~
+                      here ---^
+                """;
+        assertThatExceptionOfType(BuildOptionParseException.class)
                 .isThrownBy(() -> parse(code))
-                .withMessageContaining("Syntax error");
+                .withMessage(unindent(expectedErrorMessage));
     }
 
     @Test
-    void transformWithAllRemovals() {
+    void transformWithAllRemovals() throws Exception {
         String code =
                 """
                     transform "group:artifact" {
@@ -774,7 +857,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void emptyBuildRequiresBlock() {
+    void emptyBuildRequiresBlock() throws Exception {
         String code = "buildRequires {}";
         DeclarativeBuild db = parsed(code);
         assertThat(db.getExtraBuildReqs()).isEmpty();
@@ -782,7 +865,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void emptyAliasesBlock() {
+    void emptyAliasesBlock() throws Exception {
         String code =
                 """
                     artifact "x:y" {
@@ -794,7 +877,7 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void emptyFilesBlock() {
+    void emptyFilesBlock() throws Exception {
         String code =
                 """
                     artifact "x:y" {
@@ -806,9 +889,560 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void whitespaceBetweenKeywordsAndLiterals() {
+    void whitespaceBetweenKeywordsAndLiterals() throws Exception {
         String code = "mavenOption    \"-X\"";
         DeclarativeBuild db = parsed(code);
         assertThat(db.getMavenOptions()).containsExactly("-X");
+    }
+
+    @Test
+    void illegalCharacter() throws Exception {
+        String code =
+                """
+                    mavenOption $
+                """;
+        String expectedErrorMessage =
+                """
+                    Lexical error: illegal character
+                    at BuildOption: mavenOption
+                    ~~~~~~~~~~
+                    mavenOption
+                    ~~~~~~~~~~
+                      here -----^
+                """;
+        assertThatExceptionOfType(BuildOptionParseException.class)
+                .isThrownBy(() -> parse(code))
+                .withMessage(unindent(expectedErrorMessage));
+    }
+
+    @Test
+    void capitalKeyword() throws Exception {
+        String code =
+                """
+                    MavenOption "-X"
+                """;
+        String expectedErrorMessage =
+                """
+                    Lexical error: illegal character
+                    at BuildOption:
+                    ~~~~~~~~~~
+
+                    ~~~~~~~~~~
+                        ^--- here
+                """;
+        assertThatExceptionOfType(BuildOptionParseException.class)
+                .isThrownBy(() -> parse(code))
+                .withMessage(unindent(expectedErrorMessage));
+    }
+
+    @Test
+    void alphanumericKeyword() throws Exception {
+        String code =
+                """
+                    mavenOption2 "-X"
+                """;
+        String expectedErrorMessage =
+                """
+                    Lexical error: illegal character
+                    at BuildOption: mavenOption
+                    ~~~~~~~~~~
+                    mavenOption
+                    ~~~~~~~~~~
+                      here ----^
+                """;
+        assertThatExceptionOfType(BuildOptionParseException.class)
+                .isThrownBy(() -> parse(code))
+                .withMessage(unindent(expectedErrorMessage));
+    }
+
+    @Test
+    void commentHash() throws Exception {
+        String code =
+                """
+                    mavenOption "-X"  # this enables debugging
+                """;
+        String expectedErrorMessage =
+                """
+                    Lexical error: illegal character
+                    at BuildOption: mavenOption "-X"
+                    ~~~~~~~~~~
+                    mavenOption "-X"
+                    ~~~~~~~~~~
+                      here -----------^
+                """;
+        assertThatExceptionOfType(BuildOptionParseException.class)
+                .isThrownBy(() -> parse(code))
+                .withMessage(unindent(expectedErrorMessage));
+    }
+
+    @Test
+    void parentheses() throws Exception {
+        String code =
+                """
+                    artifact "foo:bar" ( alias "a:b" )
+                """;
+        String expectedErrorMessage =
+                """
+                    Lexical error: illegal character
+                    at BuildOption: artifact "foo:bar"
+                    ~~~~~~~~~~
+                    artifact "foo:bar"
+                    ~~~~~~~~~~
+                      here ------------^
+                """;
+        assertThatExceptionOfType(BuildOptionParseException.class)
+                .isThrownBy(() -> parse(code))
+                .withMessage(unindent(expectedErrorMessage));
+    }
+
+    @Test
+    void unclosedLiteral() throws Exception {
+        String code =
+                """
+                    mavenOption "-X
+                """;
+        String expectedErrorMessage =
+                """
+                    Lexical error: unterminated string literal
+                    at BuildOption: mavenOption
+                    ~~~~~~~~~~
+                    mavenOption
+                    ~~~~~~~~~~
+                      here -----^
+                """;
+        assertThatExceptionOfType(BuildOptionParseException.class)
+                .isThrownBy(() -> parse(code))
+                .withMessage(unindent(expectedErrorMessage));
+    }
+
+    @Test
+    void tabs() throws Exception {
+        String code = "foo\tbar";
+        String expectedErrorMessage =
+                """
+                    Lexical error: TAB characters are not allowed, replace them with spaces
+                """;
+        assertThatExceptionOfType(BuildOptionParseException.class)
+                .isThrownBy(() -> parse(code))
+                .withMessage(unindent(expectedErrorMessage));
+    }
+
+    @Test
+    void expectedKeywordFoundLiteral() throws Exception {
+        String code =
+                """
+                    mavenOption "-X" "-Dfoo=bar"
+                """;
+        String expectedErrorMessage =
+                """
+                    Syntax error: expected global keyword, or end of build options
+                    at BuildOption: [...]
+                    ~~~~~~~~~~~~~~~~
+                    mavenOption "-X"
+                    "-Dfoo=bar"
+                    ~~~~~~~~~~~~~~~~
+                    ^--- here
+                """;
+        assertThatExceptionOfType(BuildOptionParseException.class)
+                .isThrownBy(() -> parse(code))
+                .withMessage(unindent(expectedErrorMessage));
+    }
+
+    @Test
+    void expectedKeywordFoundLiteralAtTransform() throws Exception {
+        String code =
+                """
+                    transform "foo:bar" { "xxx"
+                """;
+        String expectedErrorMessage =
+                """
+                    Syntax error: expected transformation keyword, or closing brace ending transform block
+                    at BuildOption: transform "foo:bar" ->
+                    ~~~~~~~~~~~~~~~~~~~~~
+                    transform "foo:bar" {
+                        "xxx"
+                    ~~~~~~~~~~~~~~~~~~~~~
+                        ^--- here
+                """;
+        assertThatExceptionOfType(BuildOptionParseException.class)
+                .isThrownBy(() -> parse(code))
+                .withMessage(unindent(expectedErrorMessage));
+    }
+
+    @Test
+    void expectedKeywordFoundOpeningBrace() throws Exception {
+        String code =
+                """
+                    mavenOption {
+                """;
+        String expectedErrorMessage =
+                """
+                    Syntax error: expected literal (quoted string)
+                    at BuildOption: mavenOption
+                    ~~~~~~~~~~
+                    mavenOption {
+                    ~~~~~~~~~~
+                      here -----^
+                """;
+        assertThatExceptionOfType(BuildOptionParseException.class)
+                .isThrownBy(() -> parse(code))
+                .withMessage(unindent(expectedErrorMessage));
+    }
+
+    @Test
+    void expectedKeywordFoundClosingBrace() throws Exception {
+        String code =
+                """
+                    mavenOption }
+                """;
+        String expectedErrorMessage =
+                """
+                    Syntax error: expected literal (quoted string)
+                    at BuildOption: mavenOption
+                    ~~~~~~~~~~~
+                    mavenOption
+                    }
+                    ~~~~~~~~~~~
+                    ^--- here
+                """;
+        assertThatExceptionOfType(BuildOptionParseException.class)
+                .isThrownBy(() -> parse(code))
+                .withMessage(unindent(expectedErrorMessage));
+    }
+
+    @Test
+    void expectedKeywordFoundLiteralInner() throws Exception {
+        String code =
+                """
+                    artifact "foo:bar" { "-X"
+                """;
+        String expectedErrorMessage =
+                """
+                    Syntax error: expected keyword related to artifact packaging, or closing brace ending artifact block
+                    at BuildOption: artifact "foo:bar" ->
+                    ~~~~~~~~~~~~~~~~~~~~
+                    artifact "foo:bar" {
+                        "-X"
+                    ~~~~~~~~~~~~~~~~~~~~
+                        ^--- here
+                """;
+        assertThatExceptionOfType(BuildOptionParseException.class)
+                .isThrownBy(() -> parse(code))
+                .withMessage(unindent(expectedErrorMessage));
+    }
+
+    @Test
+    void expectedKeywordFoundOpeningBraceInner() throws Exception {
+        String code =
+                """
+                    artifact "foo:bar" { {
+                """;
+        String expectedErrorMessage =
+                """
+                    Syntax error: expected keyword related to artifact packaging, or closing brace ending artifact block
+                    at BuildOption: artifact "foo:bar" ->
+                    ~~~~~~~~~~~~~~~~~~~~
+                    artifact "foo:bar" {
+                            {
+                    ~~~~~~~~~~~~~~~~~~~~
+                            ^--- here
+                """;
+        assertThatExceptionOfType(BuildOptionParseException.class)
+                .isThrownBy(() -> parse(code))
+                .withMessage(unindent(expectedErrorMessage));
+    }
+
+    @Test
+    void expectedClosingBraceFoundEOIInner() throws Exception {
+        String code =
+                """
+                    artifact "foo:bar" { alias "a:b"
+                """;
+        String expectedErrorMessage =
+                """
+                    Syntax error: expected keyword related to artifact packaging, or closing brace ending artifact block
+                    at BuildOption: artifact "foo:bar" -> [...]
+                    ~~~~~~~~~~~~~~~~~~~~
+                    artifact "foo:bar" {
+                        alias
+                        "a:b"
+                    ~~~~~~~~~~~~~~~~~~~~
+                             ^--- here
+                """;
+        assertThatExceptionOfType(BuildOptionParseException.class)
+                .isThrownBy(() -> parse(code))
+                .withMessage(unindent(expectedErrorMessage));
+    }
+
+    @Test
+    void expectedKeywordFoundClosingBraceTransform() throws Exception {
+        String code =
+                """
+                    transform "foo:bar" { "-X"
+                """;
+        String expectedErrorMessage =
+                """
+                    Syntax error: expected transformation keyword, or closing brace ending transform block
+                    at BuildOption: transform "foo:bar" ->
+                    ~~~~~~~~~~~~~~~~~~~~~
+                    transform "foo:bar" {
+                        "-X"
+                    ~~~~~~~~~~~~~~~~~~~~~
+                        ^--- here
+                """;
+        assertThatExceptionOfType(BuildOptionParseException.class)
+                .isThrownBy(() -> parse(code))
+                .withMessage(unindent(expectedErrorMessage));
+    }
+
+    @Test
+    void expectedClosingBraceFoundOpeningBrace() throws Exception {
+        String code =
+                """
+                    transform "foo:bar" { {
+                """;
+        String expectedErrorMessage =
+                """
+                    Syntax error: expected transformation keyword, or closing brace ending transform block
+                    at BuildOption: transform "foo:bar" ->
+                    ~~~~~~~~~~~~~~~~~~~~~
+                    transform "foo:bar" {
+                            {
+                    ~~~~~~~~~~~~~~~~~~~~~
+                            ^--- here
+                """;
+        assertThatExceptionOfType(BuildOptionParseException.class)
+                .isThrownBy(() -> parse(code))
+                .withMessage(unindent(expectedErrorMessage));
+    }
+
+    @Test
+    void expectedClosingBraceFoundEOI() throws Exception {
+        String code =
+                """
+                    transform "foo:bar" {
+                """;
+        String expectedErrorMessage =
+                """
+                    Syntax error: expected transformation keyword, or closing brace ending transform block
+                    at BuildOption: transform "foo:bar" ->
+                    ~~~~~~~~~~~~~~~~~~~
+                    transform "foo:bar"
+                        {
+                    ~~~~~~~~~~~~~~~~~~~
+                         ^--- here
+                """;
+        assertThatExceptionOfType(BuildOptionParseException.class)
+                .isThrownBy(() -> parse(code))
+                .withMessage(unindent(expectedErrorMessage));
+    }
+
+    @Test
+    void unrecognizedKeyword() throws Exception {
+        String code =
+                """
+                    mavenOption "-X" alias "foo:bar"
+                """;
+        String expectedErrorMessage =
+                """
+                    Syntax error: expected global keyword, or end of build options
+                    at BuildOption: [...]
+                    ~~~~~~~~~~~~~~~~
+                    mavenOption "-X"
+                    alias
+                    ~~~~~~~~~~~~~~~~
+                    ^--- here
+                """;
+        assertThatExceptionOfType(BuildOptionParseException.class)
+                .isThrownBy(() -> parse(code))
+                .withMessage(unindent(expectedErrorMessage));
+    }
+
+    @Test
+    void unrecognizedKeywordInner() throws Exception {
+        String code =
+                """
+                    artifact "foo:bar" { mavenOption "-X"
+                """;
+        String expectedErrorMessage =
+                """
+                    Syntax error: expected keyword related to artifact packaging, or closing brace ending artifact block
+                    at BuildOption: artifact "foo:bar" ->
+                    ~~~~~~~~~~~~~~~~~~~~
+                    artifact "foo:bar" {
+                        mavenOption
+                    ~~~~~~~~~~~~~~~~~~~~
+                        ^--- here
+                """;
+        assertThatExceptionOfType(BuildOptionParseException.class)
+                .isThrownBy(() -> parse(code))
+                .withMessage(unindent(expectedErrorMessage));
+    }
+
+    @Test
+    void expectedLiteralFoundKeyword() throws Exception {
+        String code =
+                """
+                    mavenOption debug
+                """;
+        String expectedErrorMessage =
+                """
+                    Syntax error: expected literal (quoted string)
+                    at BuildOption: mavenOption
+                    ~~~~~~~~~~
+                    mavenOption debug
+                    ~~~~~~~~~~
+                      here -----^
+                """;
+        assertThatExceptionOfType(BuildOptionParseException.class)
+                .isThrownBy(() -> parse(code))
+                .withMessage(unindent(expectedErrorMessage));
+    }
+
+    @Test
+    void expectedLiteralFoundOpeningBrace() throws Exception {
+        String code =
+                """
+                    artifact {
+                """;
+        String expectedErrorMessage =
+                """
+                    Syntax error: expected literal (quoted string)
+                    at BuildOption: artifact
+                    ~~~~~~~~~~
+                    artifact {
+                    ~~~~~~~~~~
+                             ^--- here
+                """;
+        assertThatExceptionOfType(BuildOptionParseException.class)
+                .isThrownBy(() -> parse(code))
+                .withMessage(unindent(expectedErrorMessage));
+    }
+
+    @Test
+    void expectedOpeningBraceFoundEOI() throws Exception {
+        String code =
+                """
+                    transform "foo:bar"
+                """;
+        String expectedErrorMessage =
+                """
+                    Syntax error: expected opening brace '{'
+                    at BuildOption: transform "foo:bar"
+                    ~~~~~~~~~~
+                    transform "foo:bar"
+                    ~~~~~~~~~~
+                      here ------------^
+                """;
+        assertThatExceptionOfType(BuildOptionParseException.class)
+                .isThrownBy(() -> parse(code))
+                .withMessage(unindent(expectedErrorMessage));
+    }
+
+    @Test
+    void expectedOpeningBraceFoundClosingBrace() throws Exception {
+        String code =
+                """
+                    transform "foo:bar" }
+                """;
+        String expectedErrorMessage =
+                """
+                    Syntax error: expected opening brace '{'
+                    at BuildOption: transform "foo:bar"
+                    ~~~~~~~~~~~~~~~~~~~
+                    transform "foo:bar"
+                    }
+                    ~~~~~~~~~~~~~~~~~~~
+                    ^--- here
+                """;
+        assertThatExceptionOfType(BuildOptionParseException.class)
+                .isThrownBy(() -> parse(code))
+                .withMessage(unindent(expectedErrorMessage));
+    }
+
+    @Test
+    void artifactSelectorHasMissingColon() throws Exception {
+        String code =
+                """
+                    artifact "foo" { alias "bar:baz" }
+                """;
+        String expectedErrorMessage =
+                """
+                    Syntax error: artifact glob must contain a colon
+                    at BuildOption: artifact "foo"
+                    ~~~~~~~~~~
+                    artifact "foo"
+                    ~~~~~~~~~~
+                             ^--- here
+                """;
+        assertThatExceptionOfType(BuildOptionParseException.class)
+                .isThrownBy(() -> parse(code))
+                .withMessage(unindent(expectedErrorMessage));
+    }
+
+    @Test
+    void aliasSpecifierSelectorHasMissingColon() throws Exception {
+        String code =
+                """
+                    artifact "foo:bar" { alias "baz" }
+                """;
+        String expectedErrorMessage =
+                """
+                    Syntax error: alias specifier must contain a colon
+                    at BuildOption: artifact "foo:bar" -> alias "baz"
+                    ~~~~~~~~~~~~~~~~~~~~
+                    artifact "foo:bar" {
+                        alias "baz"
+                    ~~~~~~~~~~~~~~~~~~~~
+                      here ---^
+                """;
+        assertThatExceptionOfType(BuildOptionParseException.class)
+                .isThrownBy(() -> parse(code))
+                .withMessage(unindent(expectedErrorMessage));
+    }
+
+    @Test
+    void longErrorSnippetTrimmed() throws Exception {
+        String code =
+                """
+                    usesJavapackagesBootstrap
+                    mavenOption "-DjavaVersion=8"
+                    mavenOptions {
+                        "-X"
+                        "-Prun-its"
+                    }
+                    testExclude "BadTest"
+                    testExcludes {
+                        "MyTest"
+                        "AnotherTest"
+                    }
+                    artifact "foo:bar" {
+                        aliases { ":other" }
+                        compatVersion "1.2.3"
+                        files {
+                          "foo/bar"
+                          baz
+                          "yyy"
+                        }
+                        package "my-subpackage"
+                    }
+                """;
+        String expectedErrorMessage =
+                """
+                    Syntax error: expected literal (quoted string)
+                    at BuildOption: [...] artifact "foo:bar" -> [...] files -> [...]
+                    ~~~~~~~~~~~~~~~~~~~~~~~~~
+                    [...]
+                        }
+                        compatVersion "1.2.3"
+                        files {
+                            "foo/bar"
+                            baz
+                    ~~~~~~~~~~~~~~~~~~~~~~~~~
+                            ^--- here
+                """;
+        assertThatExceptionOfType(BuildOptionParseException.class)
+                .isThrownBy(() -> parse(code))
+                .withMessage(unindent(expectedErrorMessage));
     }
 }
