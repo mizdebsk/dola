@@ -49,14 +49,43 @@ class Lexer {
         lookahead();
     }
 
-    // number of context lines to show in code snippets
-    final int nLinesInContext = 5;
+    private BuildOptionParseException lexicalError(String msg) throws BuildOptionParseException {
+
+        appendTokenToCanonicalForm();
+        int errPos = pos;
+
+        // Append normalized whitespace, if any.
+        pos = lexEnd;
+        lookahead();
+        if (!canonicalForm.isEmpty() && pos != lexEnd) {
+            canonicalForm.append(" ");
+        }
+
+        // Then append text that was partially matched as the next token, up to character at which
+        // the lexical error occurred.
+        canonicalForm.append(str.substring(pos, errPos));
+
+        // For lexical errors, error location is always the last character.
+        int errLoc = canonicalForm.length() - 1;
+
+        throw errorCommon(msg, canonicalForm.toString(), errLoc);
+    }
 
     public BuildOptionParseException error(String msg) throws BuildOptionParseException {
 
-        // Use canonical (formatted) string for error reporting.
         appendTokenToCanonicalForm();
-        String canonStr = canonicalForm.toString();
+        // For syntax errors, error location is the first character of the last lexeme.
+        int lexLen = lexEnd - lexBeg;
+        int errLoc = canonicalForm.length() - lexLen;
+
+        throw errorCommon(msg, canonicalForm.toString(), errLoc);
+    }
+
+    // number of context lines to show in code snippets, plus one
+    final int nLinesInContext = 5;
+
+    private BuildOptionParseException errorCommon(String msg, String canonStr, int errLoc)
+            throws BuildOptionParseException {
 
         // Figure out where (at which indexes) the last 5 lines of code start.
         int[] lineStart = new int[nLinesInContext];
@@ -72,14 +101,12 @@ class Lexer {
         int snipBeg = lineStart[lineNum];
 
         // Figure out width of the snippet (max line length in the snippet)
-        int snipMaxLen = lineStart[0] - lineStart[nLinesInContext - 1];
-        for (int i = 1; i < nLinesInContext; i++) {
-            snipMaxLen = Math.max(snipMaxLen, lineStart[i] - lineStart[i - 1]);
+        int snipMaxLen = canonStr.length() - curLineBeg;
+        for (int i = 0; i < nLinesInContext; i++) {
+            int lineEnd = lineStart[(i + 1) % nLinesInContext];
+            snipMaxLen = Math.max(snipMaxLen, Math.max(lineEnd - lineStart[i] - 1, 0));
         }
-        String banner = "~".repeat(Math.min(72, Math.max(10, snipMaxLen - 1)));
-
-        int lexLen = lexEnd - lexBeg;
-        int errLoc = canonStr.length() - lexLen - curLineBeg;
+        String banner = "~".repeat(Math.min(72, Math.max(10, snipMaxLen)));
 
         // First, message describing nature of the error.
         StringBuilder sb = new StringBuilder();
@@ -101,10 +128,11 @@ class Lexer {
         sb.append(banner).append("\n");
 
         // Finally, arrow pointing to the error location in the snippet.
-        if (errLoc >= 10) {
-            sb.append("  here ").append("-".repeat(errLoc - 7)).append("^");
+        int arrowOffset = errLoc - curLineBeg;
+        if (arrowOffset >= 10) {
+            sb.append("  here ").append("-".repeat(arrowOffset - 7)).append("^");
         } else {
-            sb.append(" ".repeat(errLoc)).append("^--- here");
+            sb.append(" ".repeat(arrowOffset)).append("^--- here");
         }
 
         throw new BuildOptionParseException(sb.toString());
@@ -149,13 +177,15 @@ class Lexer {
         lexBeg = pos;
         if (pos == eoi) {
             lexEnd = pos;
+            appendTokenToCanonicalForm();
+            currentToken = null;
             return this;
         }
         int ch = str.charAt(pos++);
         if (ch == '"') {
             while (str.charAt(pos++) != '"') {
                 if (pos > eoi) {
-                    error("Lexical error: unterminated string literal");
+                    lexicalError("Lexical error: unterminated string literal");
                 }
             }
         } else if (ch >= 'a' && ch <= 'z') {
@@ -163,7 +193,7 @@ class Lexer {
                 pos++;
             }
         } else if (ch != '{' && ch != '}') {
-            error("Lexical error: illegal character");
+            lexicalError("Lexical error: illegal character");
         }
         lexEnd = pos;
         appendTokenToCanonicalForm();
