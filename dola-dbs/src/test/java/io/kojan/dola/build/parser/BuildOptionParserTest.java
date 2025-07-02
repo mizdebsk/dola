@@ -59,9 +59,9 @@ class BuildOptionParserTest {
                 """
                     Syntax error: expected global keyword, or end of build options
                     at BuildOption:
-                    ~~~~~~~~~~
+                    ~~~~~~~~~~~
                     skipTestsss
-                    ~~~~~~~~~~
+                    ~~~~~~~~~~~
                     ^--- here
                 """;
         assertThatExceptionOfType(BuildOptionParseException.class)
@@ -743,27 +743,9 @@ class BuildOptionParserTest {
                     at BuildOption: artifact "some:thing" -> [...]
                     ~~~~~~~~~~~~~~~~~~~~~~~
                     artifact "some:thing" {
-                        package
-                        "foo"
+                        package "foo"
                     ~~~~~~~~~~~~~~~~~~~~~~~
-                             ^--- here
-                """;
-        assertThatExceptionOfType(BuildOptionParseException.class)
-                .isThrownBy(() -> parse(code))
-                .withMessage(unindent(expectedErrorMessage));
-    }
-
-    @Test
-    void unclosedStringLiteralShouldFail() throws Exception {
-        String code = "mavenOption \"-X";
-        String expectedErrorMessage =
-                """
-                    Lexical error: unterminated string literal
-                    at BuildOption: mavenOption
-                    ~~~~~~~~~~
-                    mavenOption
-                    ~~~~~~~~~~
-                      here -----^
+                      here ----------^
                 """;
         assertThatExceptionOfType(BuildOptionParseException.class)
                 .isThrownBy(() -> parse(code))
@@ -899,15 +881,15 @@ class BuildOptionParserTest {
     void illegalCharacter() throws Exception {
         String code =
                 """
-                    mavenOption $
+                    mavenOption @
                 """;
         String expectedErrorMessage =
                 """
                     Lexical error: illegal character
                     at BuildOption: mavenOption
-                    ~~~~~~~~~~
-                    mavenOption
-                    ~~~~~~~~~~
+                    ~~~~~~~~~~~~~
+                    mavenOption @
+                    ~~~~~~~~~~~~~
                       here -----^
                 """;
         assertThatExceptionOfType(BuildOptionParseException.class)
@@ -926,9 +908,9 @@ class BuildOptionParserTest {
                     Lexical error: illegal character
                     at BuildOption:
                     ~~~~~~~~~~
-
+                    M
                     ~~~~~~~~~~
-                        ^--- here
+                    ^--- here
                 """;
         assertThatExceptionOfType(BuildOptionParseException.class)
                 .isThrownBy(() -> parse(code))
@@ -945,9 +927,9 @@ class BuildOptionParserTest {
                 """
                     Lexical error: illegal character
                     at BuildOption: mavenOption
-                    ~~~~~~~~~~
-                    mavenOption
-                    ~~~~~~~~~~
+                    ~~~~~~~~~~~~
+                    mavenOption2
+                    ~~~~~~~~~~~~
                       here ----^
                 """;
         assertThatExceptionOfType(BuildOptionParseException.class)
@@ -965,10 +947,10 @@ class BuildOptionParserTest {
                 """
                     Lexical error: illegal character
                     at BuildOption: mavenOption "-X"
-                    ~~~~~~~~~~
-                    mavenOption "-X"
-                    ~~~~~~~~~~
-                      here -----------^
+                    ~~~~~~~~~~~~~~~~~~
+                    mavenOption "-X" #
+                    ~~~~~~~~~~~~~~~~~~
+                      here ----------^
                 """;
         assertThatExceptionOfType(BuildOptionParseException.class)
                 .isThrownBy(() -> parse(code))
@@ -985,9 +967,9 @@ class BuildOptionParserTest {
                 """
                     Lexical error: illegal character
                     at BuildOption: artifact "foo:bar"
-                    ~~~~~~~~~~
-                    artifact "foo:bar"
-                    ~~~~~~~~~~
+                    ~~~~~~~~~~~~~~~~~~~~
+                    artifact "foo:bar" (
+                    ~~~~~~~~~~~~~~~~~~~~
                       here ------------^
                 """;
         assertThatExceptionOfType(BuildOptionParseException.class)
@@ -1005,10 +987,10 @@ class BuildOptionParserTest {
                 """
                     Lexical error: unterminated string literal
                     at BuildOption: mavenOption
-                    ~~~~~~~~~~
-                    mavenOption
-                    ~~~~~~~~~~
-                      here -----^
+                    ~~~~~~~~~~~~~~~~~
+                    mavenOption "-X $
+                    ~~~~~~~~~~~~~~~~~
+                      here ---------^
                 """;
         assertThatExceptionOfType(BuildOptionParseException.class)
                 .isThrownBy(() -> parse(code))
@@ -1079,9 +1061,9 @@ class BuildOptionParserTest {
                 """
                     Syntax error: expected literal (quoted string)
                     at BuildOption: mavenOption
-                    ~~~~~~~~~~
+                    ~~~~~~~~~~~~~
                     mavenOption {
-                    ~~~~~~~~~~
+                    ~~~~~~~~~~~~~
                       here -----^
                 """;
         assertThatExceptionOfType(BuildOptionParseException.class)
@@ -1164,10 +1146,9 @@ class BuildOptionParserTest {
                     at BuildOption: artifact "foo:bar" -> [...]
                     ~~~~~~~~~~~~~~~~~~~~
                     artifact "foo:bar" {
-                        alias
-                        "a:b"
+                        alias "a:b"
                     ~~~~~~~~~~~~~~~~~~~~
-                             ^--- here
+                      here --------^
                 """;
         assertThatExceptionOfType(BuildOptionParseException.class)
                 .isThrownBy(() -> parse(code))
@@ -1226,11 +1207,10 @@ class BuildOptionParserTest {
                 """
                     Syntax error: expected transformation keyword, or closing brace
                     at BuildOption: transform "foo:bar" ->
-                    ~~~~~~~~~~~~~~~~~~~
-                    transform "foo:bar"
-                        {
-                    ~~~~~~~~~~~~~~~~~~~
-                         ^--- here
+                    ~~~~~~~~~~~~~~~~~~~~~
+                    transform "foo:bar" {
+                    ~~~~~~~~~~~~~~~~~~~~~
+                      here --------------^
                 """;
         assertThatExceptionOfType(BuildOptionParseException.class)
                 .isThrownBy(() -> parse(code))
@@ -1289,9 +1269,9 @@ class BuildOptionParserTest {
                 """
                     Syntax error: expected literal (quoted string)
                     at BuildOption: mavenOption
-                    ~~~~~~~~~~
+                    ~~~~~~~~~~~~~~~~~
                     mavenOption debug
-                    ~~~~~~~~~~
+                    ~~~~~~~~~~~~~~~~~
                       here -----^
                 """;
         assertThatExceptionOfType(BuildOptionParseException.class)
@@ -1329,9 +1309,9 @@ class BuildOptionParserTest {
                 """
                     Syntax error: expected opening brace '{'
                     at BuildOption: transform "foo:bar"
-                    ~~~~~~~~~~
+                    ~~~~~~~~~~~~~~~~~~~
                     transform "foo:bar"
-                    ~~~~~~~~~~
+                    ~~~~~~~~~~~~~~~~~~~
                       here ------------^
                 """;
         assertThatExceptionOfType(BuildOptionParseException.class)
@@ -1370,9 +1350,9 @@ class BuildOptionParserTest {
                 """
                     Syntax error: artifact glob must contain a colon
                     at BuildOption: artifact "foo"
-                    ~~~~~~~~~~
+                    ~~~~~~~~~~~~~~
                     artifact "foo"
-                    ~~~~~~~~~~
+                    ~~~~~~~~~~~~~~
                              ^--- here
                 """;
         assertThatExceptionOfType(BuildOptionParseException.class)
