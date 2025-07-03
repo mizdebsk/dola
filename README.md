@@ -60,7 +60,7 @@ Syntax
 ------
 
 For description of the syntax for declarative spec files, see
-[SYNTAX.md](SYNTAX.md).
+the [Reference Manual](MANUAL.md).
 
 
 Copying
