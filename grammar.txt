@@ -1,0 +1,60 @@
+<Literal> ::= "\"" { any number of characters except '"' or whitespace } "\""
+
+<LiteralSequence> ::= ε
+<LiteralSequence> ::= <Literal> <LiteralSequence>
+
+<DeclarativeBuild> ::= <DeclarativeBuildPartList>
+
+<DeclarativeBuildPartList> ::= ε
+<DeclarativeBuildPartList> ::= <DeclarativeBuildPart> <DeclarativeBuildPartList>
+<DeclarativeBuildPart> ::= <Flag>
+<DeclarativeBuildPart> ::= <MavenOptions>
+<DeclarativeBuildPart> ::= <TestExcludes>
+<DeclarativeBuildPart> ::= <BuildRequires>
+<DeclarativeBuildPart> ::= <PackagingOptions>
+<DeclarativeBuildPart> ::= <TransformOptions>
+
+<Flag> ::= "skipTests"
+<Flag> ::= "singletonPackaging"
+<Flag> ::= "usesJavapackagesBootstrap"
+
+<MavenOptions> ::= "mavenOption" <Literal>
+<MavenOptions> ::= "mavenOptions" "{" <LiteralSequence> "}"
+
+<TestExcludes> ::= "testExclude" <Literal>
+<TestExcludes> ::= "testExcludes" "{" <LiteralSequence> "}"
+
+<BuildRequires> ::= "buildRequire" <Literal>
+<BuildRequires> ::= "buildRequireFilter" <Literal>
+<BuildRequires> ::= "buildRequires" "{" <BuildRequiresPartSequence> "}"
+<BuildRequiresPartSequence> ::= ε
+<BuildRequiresPartSequence> ::= <BuildRequiresPart> <BuildRequiresPartSequence>
+<BuildRequiresPart> ::= <Literal>
+<BuildRequiresPart> ::= "filter" <Literal>
+
+<PackagingOptions> ::= "artifact" <Literal> "{" <PackagingOptionPartSequence> "}"
+<PackagingOptionPartSequence> ::= ε
+<PackagingOptionPartSequence> ::= <PackagingOptionPart> <PackagingOptionPartSequence>
+<PackagingOptionPart> ::= "package" <Literal>
+<PackagingOptionPart> ::= "noInstall"
+<PackagingOptionPart> ::= "repository" <Literal>
+<PackagingOptionPart> ::= "file" <Literal>
+<PackagingOptionPart> ::= "files" "{" <LiteralSequence> "}"
+<PackagingOptionPart> ::= "compatVersion" <Literal>
+<PackagingOptionPart> ::= "compatVersions" "{" <LiteralSequence> "}"
+<PackagingOptionPart> ::= "alias" <Literal>
+<PackagingOptionPart> ::= "aliases" "{" <LiteralSequence> "}"
+
+<TransformOptions> ::= "transform" <Literal> "{" <TransformOptionPartSequence> "}"
+<TransformOptionPartSequence> ::= ε
+<TransformOptionPartSequence> ::= <TransformOptionPart> <TransformOptionPartSequence>
+<TransformOptionPart> ::= "removeParent"
+<TransformOptionPart> ::= "removeParent" <Literal>
+<TransformOptionPart> ::= "removePlugin" <Literal>
+<TransformOptionPart> ::= "removePlugins" "{" <LiteralSequence> "}"
+<TransformOptionPart> ::= "removeDependency" <Literal>
+<TransformOptionPart> ::= "removeDependencies" "{" <LiteralSequence> "}"
+<TransformOptionPart> ::= "removeSubproject" <Literal>
+<TransformOptionPart> ::= "removeSubprojects" "{" <LiteralSequence> "}"
+<TransformOptionPart> ::= "addDependency" <Literal>
+<TransformOptionPart> ::= "addDependencies" "{" <LiteralSequence> "}"
