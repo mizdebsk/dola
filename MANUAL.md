@@ -146,6 +146,7 @@ Build Requirements
 ```bnf
 <BuildRequires> ::= "buildRequire" <Literal>
                   | "buildRequireFilter" <Literal>
+                  | "buildRequireVersion" <Literal> <Literal>
                   | "buildRequires" "{" <BuildRequiresPartSequence> "}"
 
 <BuildRequiresPartSequence> ::= ε
@@ -153,21 +154,25 @@ Build Requirements
 
 <BuildRequiresPart> ::= <Literal>
                       | "filter" <Literal>
+                      | "version" <Literal> <Literal>
 ```
 
-You can specify build-time dependencies and filters to remove them.
+You can specify build-time dependencies, filters to remove them, or
+compat versions to use.
 
 Examples:
 
 ```dsl
 buildRequire "org.slf4j:slf4j-api"
 buildRequireFilter "com.thirdparty:*"
+buildRequireVersion ":commons-lang" "3"
 ```
 
 ```dsl
 buildRequires {
     "org.apache:commons-lang3"
     filter "com.unwanted:*"
+    version "org.apache.maven:*" "4.0.0"
 }
 ```
 

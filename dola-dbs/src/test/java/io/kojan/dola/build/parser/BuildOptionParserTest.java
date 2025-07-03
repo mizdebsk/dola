@@ -165,6 +165,16 @@ class BuildOptionParserTest {
     }
 
     @Test
+    void buildRequireVersion() throws Exception {
+        String code =
+                """
+                    buildRequireVersion "foo:bar" "1.2.3"
+                """;
+        DeclarativeBuild db = parsed(code);
+        assertThat(db.getBuildReqVersions()).containsEntry(Artifact.of("foo:bar"), "1.2.3");
+    }
+
+    @Test
     void buildRequiresOne() throws Exception {
         String code =
                 """
@@ -194,17 +204,19 @@ class BuildOptionParserTest {
     }
 
     @Test
-    void buildRequiresFilter() throws Exception {
+    void buildRequiresCombined() throws Exception {
         String code =
                 """
                     buildRequires {
                         "foo:bar"
                         filter "*:baz"
+                        version "org.xyzzy:*" "42"
                     }
                 """;
         DeclarativeBuild db = parsed(code);
         assertThat(db.getExtraBuildReqs()).containsExactlyInAnyOrder(Artifact.of("foo:bar"));
         assertThat(db.getFilteredBuildReqs()).containsExactlyInAnyOrder(Artifact.of("*:baz"));
+        assertThat(db.getBuildReqVersions()).containsEntry(Artifact.of("org.xyzzy:*"), "42");
     }
 
     @Test

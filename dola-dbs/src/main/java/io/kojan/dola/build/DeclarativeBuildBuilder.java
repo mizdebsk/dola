@@ -16,8 +16,10 @@
 package io.kojan.dola.build;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.fedoraproject.xmvn.artifact.Artifact;
 
@@ -29,6 +31,7 @@ public class DeclarativeBuildBuilder {
     private final List<PackagingOption> packagingOptions = new ArrayList<>();
     private final Set<Artifact> extraBuildReqs = new LinkedHashSet<>();
     private final Set<Artifact> filteredBuildReqs = new LinkedHashSet<>();
+    private final Map<Artifact, String> buildReqVersions = new LinkedHashMap<>();
     private final List<TransformOption> modelTransformations = new ArrayList<>();
     private final List<String> testExcludes = new ArrayList<>();
     private boolean usesJavapackagesBootstrap;
@@ -69,6 +72,11 @@ public class DeclarativeBuildBuilder {
         return this;
     }
 
+    public DeclarativeBuildBuilder buildReqVersion(Artifact buildReq, String version) {
+        buildReqVersions.put(buildReq, version);
+        return this;
+    }
+
     public DeclarativeBuildBuilder modelTransformation(TransformOption modelTransformation) {
         modelTransformations.add(modelTransformation);
         return this;
@@ -102,6 +110,7 @@ public class DeclarativeBuildBuilder {
                 packagingOptions,
                 extraBuildReqs,
                 filteredBuildReqs,
+                buildReqVersions,
                 modelTransformations,
                 testExcludes,
                 usesJavapackagesBootstrap,

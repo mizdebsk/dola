@@ -94,11 +94,18 @@ public class BuildOptionParser {
             db.filteredBuildReq(Artifact.of(lx.next().expectLiteral()));
             return true;
         }
+        if (lx.isKeyword("buildRequireVersion")) {
+            db.buildReqVersion(Artifact.of(lx.next().expectLiteral()), lx.next().expectLiteral());
+            return true;
+        }
         if (lx.isKeyword("buildRequires")) {
             lx.next().expectBlockBegin();
             while (!lx.next().isBlockEnd()) {
                 if (lx.isKeyword("filter")) {
                     db.filteredBuildReq(Artifact.of(lx.next().expectLiteral()));
+                } else if (lx.isKeyword("version")) {
+                    db.buildReqVersion(
+                            Artifact.of(lx.next().expectLiteral()), lx.next().expectLiteral());
                 } else {
                     db.extraBuildReq(Artifact.of(lx.expectLiteral()));
                 }
