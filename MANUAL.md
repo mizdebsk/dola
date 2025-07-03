@@ -40,6 +40,7 @@ Top-Level Structure
                              | <DeclarativeBuildPart> <DeclarativeBuildPartList>
 
 <DeclarativeBuildPart> ::= <Flag>
+                         | <Toolchainptions>
                          | <MavenOptions>
                          | <TestExcludes>
                          | <BuildRequires>
@@ -72,6 +73,22 @@ Examples:
 
 ```dsl
 singletonPackaging
+```
+
+
+Toolchain Options
+-----------------
+
+```bnf
+<ToolchainOptions> ::= "xmvnToolchain" <Literal>
+```
+
+Specifies which XMvn toolchain to use during package build.
+
+Examples:
+
+```dsl
+xmvnToolchain "openjdk25"
 ```
 
 

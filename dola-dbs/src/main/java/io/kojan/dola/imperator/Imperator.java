@@ -131,9 +131,12 @@ public class Imperator {
                 lines.add("%if %{without bootstrap}");
             }
 
-            if (!ctx.getExtraBuildReqs().isEmpty()) {
+            if (!ctx.getExtraBuildReqs().isEmpty() || ctx.getXmvnToolchain() != null) {
                 lines.add("# Explicit static build-dependencies.");
                 lines.add("cat <<__DOLA_EOF__");
+                if (ctx.getXmvnToolchain() != null) {
+                    lines.add("xmvn5-toolchain-" + ctx.getXmvnToolchain());
+                }
                 for (Artifact br : ctx.getExtraBuildReqs()) {
                     lines.add(formatDep(br));
                 }

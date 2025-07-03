@@ -33,6 +33,7 @@ public class DeclarativeBuildBuilder {
     private final List<String> testExcludes = new ArrayList<>();
     private boolean usesJavapackagesBootstrap;
     private boolean singletonPackaging;
+    private String xmvnToolchain;
 
     public DeclarativeBuildBuilder(String baseName) {
         this.baseName = baseName;
@@ -88,6 +89,11 @@ public class DeclarativeBuildBuilder {
         return this;
     }
 
+    public DeclarativeBuildBuilder xmvnToolchain(String xmvnToolchain) {
+        this.xmvnToolchain = xmvnToolchain;
+        return this;
+    }
+
     public DeclarativeBuild build() {
         return new DeclarativeBuild(
                 baseName,
@@ -99,6 +105,7 @@ public class DeclarativeBuildBuilder {
                 modelTransformations,
                 testExcludes,
                 usesJavapackagesBootstrap,
-                singletonPackaging);
+                singletonPackaging,
+                xmvnToolchain);
     }
 }

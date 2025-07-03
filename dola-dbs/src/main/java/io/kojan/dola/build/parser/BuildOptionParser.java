@@ -62,6 +62,14 @@ public class BuildOptionParser {
         return false;
     }
 
+    private boolean tryParseToolchainOptions() throws BuildOptionParseException {
+        if (lx.isKeyword("xmvnToolchain")) {
+            db.xmvnToolchain(lx.next().expectLiteral());
+            return true;
+        }
+        return false;
+    }
+
     private boolean tryParseTestExcludes() throws BuildOptionParseException {
         if (lx.isKeyword("testExclude")) {
             db.testExclude(lx.next().expectLiteral());
@@ -272,6 +280,7 @@ public class BuildOptionParser {
     public DeclarativeBuild parse() throws BuildOptionParseException {
         while (!lx.next().isEndOfInput()) {
             if (tryParseFlag()
+                    || tryParseToolchainOptions()
                     || tryParseMavenOptions()
                     || tryParseTestExcludes()
                     || tryParseBuildRequires()
