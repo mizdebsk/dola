@@ -37,6 +37,39 @@ public class Imperator {
         this.withBootstrap = withBootstrap;
     }
 
+    private String glob2re(String glob) {
+        if (glob.isEmpty()) {
+            return ".*";
+        }
+        return glob.replaceAll("\\*", ".*").replaceAll("\\?", ".");
+    }
+
+    private String glob2re(Artifact glob) {
+        return glob2re(glob.getGroupId()) + ":" + glob2re(glob.getArtifactId());
+    }
+
+    private List<String> getGleanerArgs() {
+        List<String> args = new ArrayList<>();
+        args.add("-Ddola.gleaner.outputFile=/dev/fd/4");
+        int i = 0;
+        for (Artifact br : ctx.getFilteredBuildReqs()) {
+            String id = String.format("%03d", i++);
+            String key = "dola.gleaner.filter." + id;
+            String val = glob2re(br);
+            args.add("-D" + key + "=" + val);
+        }
+        int j = 0;
+        for (var entry : ctx.getBuildReqVersions().entrySet()) {
+            Artifact br = entry.getKey();
+            String version = entry.getValue();
+            String id = String.format("%03d", j++);
+            String key = "dola.gleaner.version." + id;
+            String val = glob2re(br) + "=" + version;
+            args.add("-D" + key + "=" + val);
+        }
+        return args;
+    }
+
     private List<String> getTransformerArgs() {
         List<String> args = new ArrayList<>();
         int i = 0;
@@ -154,7 +187,7 @@ public class Imperator {
                 extCp += ":/usr/share/java/dola-transformer/dola-transformer.jar";
             }
             args.add("-Dmaven.ext.class.path=" + extCp);
-            args.add("-Ddola.gleaner.outputFile=/dev/fd/4");
+            args.addAll(getGleanerArgs());
             args.addAll(getTransformerArgs());
             args.addAll(getTestArgs());
             args.addAll(ctx.getMavenOptions());
@@ -167,14 +200,6 @@ public class Imperator {
             args.add(mavenGoal);
 
             args.add("4>&1 >&2");
-
-            if (!ctx.getFilteredBuildReqs().isEmpty()) {
-                // TODO implement filtering in Dola Gleaner and don't use sed
-                args.add("    | sed");
-                for (Artifact br : ctx.getFilteredBuildReqs()) {
-                    args.add("    -e '/" + formatDep(br) + "/d'");
-                }
-            }
 
             lines.add("# Call XMvn with Dola Gleaner extension.  With this extension enabled,");
             lines.add("# Maven build is not actually executed, but the extension analyzes");

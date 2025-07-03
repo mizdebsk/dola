@@ -29,11 +29,13 @@
 
 <BuildRequires> ::= "buildRequire" <Literal>
 <BuildRequires> ::= "buildRequireFilter" <Literal>
+<BuildRequires> ::= "buildRequireVersion" <Literal> <Literal>
 <BuildRequires> ::= "buildRequires" "{" <BuildRequiresPartSequence> "}"
 <BuildRequiresPartSequence> ::= ε
 <BuildRequiresPartSequence> ::= <BuildRequiresPart> <BuildRequiresPartSequence>
 <BuildRequiresPart> ::= <Literal>
 <BuildRequiresPart> ::= "filter" <Literal>
+<BuildRequiresPart> ::= "version" <Literal> <Literal>
 
 <PackagingOptions> ::= "artifact" <Literal> "{" <PackagingOptionPartSequence> "}"
 <PackagingOptionPartSequence> ::= ε

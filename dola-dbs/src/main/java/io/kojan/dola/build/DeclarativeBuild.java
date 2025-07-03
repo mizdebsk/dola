@@ -16,6 +16,7 @@
 package io.kojan.dola.build;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.fedoraproject.xmvn.artifact.Artifact;
 
@@ -27,6 +28,7 @@ public class DeclarativeBuild {
     private final List<PackagingOption> packagingOptions;
     private final Set<Artifact> extraBuildReqs;
     private final Set<Artifact> filteredBuildReqs;
+    private final Map<Artifact, String> buildReqVersions;
     private final List<TransformOption> transformOptions;
     private final List<String> testExcludes;
     private final boolean usesJavapackagesBootstrap;
@@ -40,6 +42,7 @@ public class DeclarativeBuild {
             List<PackagingOption> packagingOptions,
             Set<Artifact> extraBuildReqs,
             Set<Artifact> filteredBuildReqs,
+            Map<Artifact, String> buildReqVersions,
             List<TransformOption> transformOptions,
             List<String> testExcludes,
             boolean usesJavapackagesBootstrap,
@@ -51,6 +54,7 @@ public class DeclarativeBuild {
         this.packagingOptions = List.copyOf(packagingOptions);
         this.extraBuildReqs = Set.copyOf(extraBuildReqs);
         this.filteredBuildReqs = Set.copyOf(filteredBuildReqs);
+        this.buildReqVersions = Map.copyOf(buildReqVersions);
         this.transformOptions = List.copyOf(transformOptions);
         this.testExcludes = List.copyOf(testExcludes);
         this.usesJavapackagesBootstrap = usesJavapackagesBootstrap;
@@ -80,6 +84,10 @@ public class DeclarativeBuild {
 
     public Set<Artifact> getFilteredBuildReqs() {
         return filteredBuildReqs;
+    }
+
+    public Map<Artifact, String> getBuildReqVersions() {
+        return buildReqVersions;
     }
 
     public List<TransformOption> getTransformOptions() {
