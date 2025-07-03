@@ -31,6 +31,7 @@ public class DeclarativeBuild {
     private final List<String> testExcludes;
     private final boolean usesJavapackagesBootstrap;
     private final boolean singletonPackaging;
+    private final String xmvnToolchain;
 
     public DeclarativeBuild(
             String baseName,
@@ -42,7 +43,8 @@ public class DeclarativeBuild {
             List<TransformOption> transformOptions,
             List<String> testExcludes,
             boolean usesJavapackagesBootstrap,
-            boolean singletonPackaging) {
+            boolean singletonPackaging,
+            String xmvnToolchain) {
         this.baseName = baseName;
         this.skipTests = skipTests;
         this.mavenOptions = List.copyOf(mavenOptions);
@@ -53,6 +55,7 @@ public class DeclarativeBuild {
         this.testExcludes = List.copyOf(testExcludes);
         this.usesJavapackagesBootstrap = usesJavapackagesBootstrap;
         this.singletonPackaging = singletonPackaging;
+        this.xmvnToolchain = xmvnToolchain;
     }
 
     public String getBaseName() {
@@ -93,5 +96,9 @@ public class DeclarativeBuild {
 
     public boolean isSingletonPackaging() {
         return singletonPackaging;
+    }
+
+    public String getXmvnToolchain() {
+        return xmvnToolchain;
     }
 }

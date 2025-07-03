@@ -8,6 +8,7 @@
 <DeclarativeBuildPartList> ::= ε
 <DeclarativeBuildPartList> ::= <DeclarativeBuildPart> <DeclarativeBuildPartList>
 <DeclarativeBuildPart> ::= <Flag>
+<DeclarativeBuildPart> ::= <ToolchainOptions>
 <DeclarativeBuildPart> ::= <MavenOptions>
 <DeclarativeBuildPart> ::= <TestExcludes>
 <DeclarativeBuildPart> ::= <BuildRequires>
@@ -17,6 +18,8 @@
 <Flag> ::= "skipTests"
 <Flag> ::= "singletonPackaging"
 <Flag> ::= "usesJavapackagesBootstrap"
+
+<ToolchainOptions> ::= "xmvnToolchain" <Literal>
 
 <MavenOptions> ::= "mavenOption" <Literal>
 <MavenOptions> ::= "mavenOptions" "{" <LiteralSequence> "}"

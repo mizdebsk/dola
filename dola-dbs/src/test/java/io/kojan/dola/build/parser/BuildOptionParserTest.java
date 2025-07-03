@@ -110,6 +110,16 @@ class BuildOptionParserTest {
     }
 
     @Test
+    void xmvnToolchain() throws Exception {
+        String code =
+                """
+                    xmvnToolchain "openjdk25"
+                """;
+        DeclarativeBuild db = parsed(code);
+        assertThat(db.getXmvnToolchain()).isEqualTo("openjdk25");
+    }
+
+    @Test
     void mavenOption() throws Exception {
         String code =
                 """
