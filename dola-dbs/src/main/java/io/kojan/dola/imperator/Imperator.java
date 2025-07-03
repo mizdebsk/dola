@@ -67,8 +67,10 @@ public class Imperator {
         List<String> lines = new ArrayList<>();
 
         Configuration conf = new Configuration();
-        conf.setBuildSettings(new BuildSettings());
-        conf.getBuildSettings().setSkipTests(ctx.isSkipTests());
+        if (ctx.isSkipTests()) {
+            conf.setBuildSettings(new BuildSettings());
+            conf.getBuildSettings().setSkipTests(true);
+        }
 
         if (ctx.isSingletonPackaging()) {
             PackagingRule rule1 = new PackagingRule();
@@ -114,12 +116,15 @@ public class Imperator {
             conf.addArtifactManagement(rule);
         }
 
-        lines.add("# Write out XMvn configuration before calling XMvn for the first time.");
-        Path confPath = Path.of(".xmvn/config.d/dola.xml");
-        lines.add("mkdir -p " + confPath.getParent());
-        lines.add("cat <<__DOLA_EOF__ >" + confPath);
-        lines.add(conf.toXML());
-        lines.add("__DOLA_EOF__");
+        if (conf.getBuildSettings() != null || !conf.getArtifactManagement().isEmpty()) {
+            lines.add("# Write out XMvn configuration before calling XMvn for the first time.");
+            Path confPath = Path.of(".xmvn/config.d/dola.xml");
+            lines.add("mkdir -p " + confPath.getParent());
+            lines.add("cat <<__DOLA_EOF__ >" + confPath);
+            lines.add(conf.toXML().replaceAll("<\\?xml[^?]*\\?>", "").strip());
+            lines.add("__DOLA_EOF__");
+            lines.add("");
+        }
 
         if (withBootstrap == null || !withBootstrap || !ctx.usesJavapackagesBootstrap()) {
             if (withBootstrap == null && ctx.usesJavapackagesBootstrap()) {
@@ -133,6 +138,7 @@ public class Imperator {
                     lines.add(formatDep(br));
                 }
                 lines.add("__DOLA_EOF__");
+                lines.add("");
             }
 
             List<String> args = new ArrayList<>();
