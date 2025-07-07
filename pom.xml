@@ -29,7 +29,7 @@
   <url>https://github.com/mizdebsk/dola</url>
   <inceptionYear>2025</inceptionYear>
   <modules>
-    <module>dola-rpm-api</module>
+    <module>dola-bsx-api</module>
     <module>dola-bsx</module>
     <module>dola-dbs</module>
     <module>dola-generator</module>
