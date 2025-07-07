@@ -26,7 +26,7 @@
   <dependencies>
     <dependency>
       <groupId>io.kojan</groupId>
-      <artifactId>dola-rpm-api</artifactId>
+      <artifactId>dola-bsx-api</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

@@ -21,6 +21,6 @@
     <artifactId>dola-parent</artifactId>
     <version>1.3.0-SNAPSHOT</version>
   </parent>
-  <artifactId>dola-rpm-api</artifactId>
+  <artifactId>dola-bsx-api</artifactId>
   <name>Dola RPM API</name>
 </project>
