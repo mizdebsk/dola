@@ -23,6 +23,7 @@ import java.util.TreeSet;
 import org.codehaus.plexus.classworlds.ClassWorld;
 import org.codehaus.plexus.classworlds.launcher.Configurator;
 import org.codehaus.plexus.classworlds.realm.ClassRealm;
+import org.codehaus.plexus.classworlds.realm.NoSuchRealmException;
 
 public class BSX {
 
@@ -61,11 +62,13 @@ public class BSX {
         // XXX load org.objectweb.asm.ClassVisitor now
         // I don't know why, but loading it later from the same realm results in
         // ClassNotFoundException
-        ClassRealm cr = classWorld.getRealm("Realm:generator");
-        if (cr != null) {
+        try {
+            ClassRealm cr = classWorld.getRealm("Realm:generator");
             Thread.currentThread().setContextClassLoader(cr);
             cr.loadClassFromSelf("org.objectweb.asm.ClassVisitor");
             Thread.currentThread().setContextClassLoader(systemClassLoader);
+        } catch (NoSuchRealmException e) {
+            // Ignore
         }
         return "";
     }
