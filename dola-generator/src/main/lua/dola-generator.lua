@@ -34,7 +34,7 @@ local function os_install_post()
       "io.kojan.dola.generator.stub.CallbackStub",
       "postInstall"
    )
-   print(command)
+   print(command .. "\n")
    rpm.undefine("__os_install_post")
    print(rpm.expand("%{__os_install_post}"))
 end
