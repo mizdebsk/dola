@@ -13,6 +13,6 @@ jobs:
       - name: Install dependencies
         run: microdnf -y install git-core maven-unbound && rpm -ivh https://kojipkgs.fedoraproject.org/packages/lujavrite/1.2.0/3.fc43/x86_64/lujavrite-1.2.0-3.fc43.x86_64.rpm
       - name: Checkout sources
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Maven build
         run: mvn -V -B -Prelease -Dgpg.skip clean install
