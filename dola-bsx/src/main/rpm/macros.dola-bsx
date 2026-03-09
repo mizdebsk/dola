@@ -3,3 +3,6 @@
 
 # Class path of nested JVM.
 %__dola_classpath %{_javadir}/dola/dola-bsx.jar:%{_javadir}/plexus-classworlds.jar
+
+# Path to configuration directory
+%__dola_classworlds %{_javaconfdir}/dola/classworlds

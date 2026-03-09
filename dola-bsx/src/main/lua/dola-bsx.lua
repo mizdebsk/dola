@@ -18,7 +18,7 @@ local lujavrite = require "lujavrite"
 
 local libjvm = rpm.expand("%{__dola_libjvm}")
 local classpath = rpm.expand("%{__dola_classpath}")
-local classworlds_conf = rpm.expand("%{_javaconfdir}/dola/classworlds")
+local classworlds_conf = rpm.expand("%{__dola_classworlds}")
 
 -- Initialize JVM
 if not lujavrite.initialized() then
